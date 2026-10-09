@@ -136,7 +136,10 @@ class CategoryChip extends StatelessWidget {
 }
 
 /// Horizontally scrolling single-choice category picker.
-class CategoryPicker extends StatelessWidget {
+///
+/// Scrolls the current choice into view when it opens, so a saved
+/// category is visible even if it sits at the end of the row.
+class CategoryPicker extends StatefulWidget {
   /// Creates the picker; tapping the selected chip clears the choice.
   const CategoryPicker({
     super.key,
@@ -151,24 +154,46 @@ class CategoryPicker extends StatelessWidget {
   final ValueChanged<PhotoCategory?> onChanged;
 
   @override
+  State<CategoryPicker> createState() => _CategoryPickerState();
+}
+
+class _CategoryPickerState extends State<CategoryPicker> {
+  final _selectedKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.selected == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _selectedKey.currentContext;
+      if (target != null && mounted) {
+        Scrollable.ensureVisible(target, alignment: 0.5);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        itemCount: PhotoCategory.values.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final c = PhotoCategory.values[i];
-          final isSelected = c == selected;
-          return CategoryChip(
-            key: ValueKey('category-${c.id}'),
-            category: c,
-            selected: isSelected,
-            onTap: () => onChanged(isSelected ? null : c),
-          );
-        },
+    // A Row (not a lazy list) so every chip, including the selected one,
+    // exists and can be scrolled to; there are only a handful of them.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      child: Row(
+        children: [
+          for (final (i, c) in PhotoCategory.values.indexed) ...[
+            if (i > 0) const SizedBox(width: 8),
+            KeyedSubtree(
+              key: c == widget.selected ? _selectedKey : null,
+              child: CategoryChip(
+                key: ValueKey('category-${c.id}'),
+                category: c,
+                selected: c == widget.selected,
+                onTap: () => widget.onChanged(c == widget.selected ? null : c),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

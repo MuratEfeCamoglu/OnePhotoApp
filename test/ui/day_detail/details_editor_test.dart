@@ -169,4 +169,22 @@ void main() {
     expect(find.text('Kategori ve not ekle'), findsOneWidget);
     expect(find.byIcon(Icons.add_circle_rounded), findsOneWidget);
   });
+
+  testWidgets('a saved category at the end of the row is scrolled into view', (
+    tester,
+  ) async {
+    h = await TestHarness.create(photoDays: ['2026-10-05']);
+    final last = PhotoCategory.values.last;
+    final e = h.repo.rows['2026-10-05']!;
+    h.repo.rows['2026-10-05'] = e.withDetails(note: null, category: last);
+    await openEditor(tester, '2026-10-05');
+    expect(
+      find.byKey(ValueKey('category-${last.id}')).hitTestable(),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('category-food')).hitTestable(),
+      findsNothing,
+    );
+  });
 }
