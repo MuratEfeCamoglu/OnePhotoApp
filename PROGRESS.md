@@ -5,8 +5,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 | Aşama | Durum | Commit |
 |---|---|---|
 | 1. Kurulum | ✅ | 29a3b78 |
-| 2. Çekirdek mantık | ✅ | (bu commit) |
-| 3. Veri katmanı | ⏳ | |
+| 2. Çekirdek mantık | ✅ | b1b0c45 |
+| 3. Veri katmanı | ✅ | (bu commit) |
 | 4. Zaman çizelgesi UI | ⏳ | |
 | 5. Ekleme akışları | ⏳ | |
 | 6. Gün detayı | ⏳ | |
@@ -34,3 +34,15 @@ Kriterler → testler:
 - Türkçe ay adları ("Ocak 2026", "Şubat 2026"), uzun tarih "9 Ekim 2026, Cuma".
 Dosyalar: `lib/core/date_key.dart`, `lib/core/calendar.dart`, `lib/data/entry.dart` + testleri.
 Doğrulama: format ✅, analyze ✅, test 32/32 ✅.
+
+## Aşama 3 — Veri katmanı
+Kriterler → testler:
+- upsert aynı gün için tek satır (F4a): `sqflite_entry_repository_test` (ffi, in-memory).
+- Değiştirme sonrası eski dosya silinir, sıra yeni dosya → DB → eski (F4c): `photo_service_test` "replacing deletes the old file…".
+- DB hatasında yeni dosya silinir, eski kayıt/dosya korunur (F8b): "DB failure deletes the new file…"; kopyalama hatası: "file copy failure…".
+- delete satırı ve dosyayı kaldırır (F5c).
+- Yetim temizliği sadece referanssız dosyaları siler (F6f).
+- 23:59 / 00:00 `Clock` değerleri doğru güne yazılır.
+- Ek: iptal hiçbir şeyi değiştirmez (F2c), galeri dokunulan güne yazar (F3b), `pending_date_key` picker açıkken saklanır ve kurtarma bu güne yazar (§7), izin reddi veri değiştirmez (F8a), DB kapat-aç sonrası kayıtlar korunur (F6c), kopya orijinal silinince de durur (F6a).
+Dosyalar: `entry_repository.dart`, `sqflite_entry_repository.dart`, `photo_storage.dart`, `services/photo_picker.dart` (muaf, sahtesi `test/fakes.dart`), `services/settings_store.dart` (pending anahtarı burada gerektiği için Aşama 3'te eklendi), `services/photo_service.dart`.
+Doğrulama: format ✅, analyze ✅, tüm testler ✅.
