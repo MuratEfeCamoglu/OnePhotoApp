@@ -198,3 +198,6 @@ Toplam tahmin: ~10 gün (6–12 gün aralığında).
 - **V11 — Paket kimliği:** `com.muratefecamoglu.one_photo_app` (Android `applicationId` / iOS bundle id `com.muratefecamoglu.onePhotoApp`), görünen ad "OnePhoto".
 - **V12 — Tema:** Sadece açık tema; görsel stil kaynak görseldeki gibi beyaz zemin, yuvarlatılmış küçük resimler.
 - **V13 — Yayın:** MVP'nin "bitti" tanımı mağaza yayını içermez; release APK üretilebilmesi yeterlidir. iOS release build macOS gerektirir, bu ortamda doğrulanamayabilir.
+- **V14 — iOS dağıtım hedefi:** Flutter 3.47 şablonu iOS 15.0'ı en düşük hedef olarak üretir ve Flutter bu sürümün altını desteklemez; iOS hedefi §5'teki 13.0 yerine **15.0** olarak bırakıldı.
+- **V15 — Şablon paketi:** `flutter create`'in eklediği `cupertino_icons` onaylı listede olmadığı için kaldırıldı; uygulama yalnızca Material ikonları kullanır.
+- **V16 — Yön kilidi:** Dikey yön `SystemChrome.setPreferredOrientations` ile kilitlenir; iOS `Info.plist` telefon yönleri yalnızca `Portrait` olarak bırakıldı.
