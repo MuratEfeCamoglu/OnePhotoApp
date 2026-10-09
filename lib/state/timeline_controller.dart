@@ -20,6 +20,7 @@ class TimelineController extends ChangeNotifier {
   final Map<String, Entry> _entries = {};
   final Map<String, bool> _exists = {};
   bool _loading = true;
+  String? _shownToday;
   Exception? _pendingError;
 
   /// True until the first [load] finishes.
@@ -32,7 +33,23 @@ class TimelineController extends ChangeNotifier {
   int get entryCount => _entries.length;
 
   /// Day key of the current local day.
-  String get todayKey => dateKeyOf(_clock());
+  String get todayKey => _shownToday = dateKeyOf(_clock());
+
+  /// Rebuilds listeners when the local day changed since the screen was
+  /// last built (app resumed or left open past midnight), so "today" and
+  /// the month list stay correct. Returns whether it changed.
+  bool checkDayChange() {
+    final shown = _shownToday;
+    if (shown == null || shown == dateKeyOf(_clock())) return false;
+    notifyListeners();
+    return true;
+  }
+
+  /// Time left until the next local midnight.
+  Duration untilMidnight() {
+    final now = _clock();
+    return DateTime(now.year, now.month, now.day + 1).difference(now);
+  }
 
   /// Entry of [dateKey], if any.
   Entry? entryFor(String dateKey) => _entries[dateKey];

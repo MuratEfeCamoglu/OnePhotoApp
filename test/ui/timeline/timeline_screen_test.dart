@@ -271,4 +271,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(titleSize(), 22);
   });
+
+  bool isToday(WidgetTester tester, String key) =>
+      tester.widget<DayCell>(find.byKey(ValueKey('day-$key'))).isToday;
+
+  testWidgets('returning to the app on a new day moves "today"', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    await pumpTimeline(tester, h);
+    expect(isToday(tester, '2026-10-09'), isTrue);
+
+    h.now = DateTime(2026, 10, 10, 8);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(isToday(tester, '2026-10-10'), isTrue);
+    expect(isToday(tester, '2026-10-09'), isFalse);
+  });
+
+  testWidgets('left open past midnight, "today" moves on its own', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    h.now = DateTime(2026, 10, 9, 23, 59, 58);
+    await pumpTimeline(tester, h);
+    expect(isToday(tester, '2026-10-09'), isTrue);
+
+    h.now = DateTime(2026, 10, 10, 0, 0, 1);
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    expect(isToday(tester, '2026-10-10'), isTrue);
+  });
 }

@@ -196,4 +196,17 @@ void main() {
     );
     expect(language.selected, {AppLanguage.tr});
   });
+
+  testWidgets('time picker uses the app dialog colour, not the M3 tint', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+    await tester.tap(find.byKey(const ValueKey('reminder-time')));
+    await tester.pumpAndSettle();
+    final context = tester.element(find.byType(TimePickerDialog));
+    expect(
+      TimePickerTheme.of(context).backgroundColor,
+      AppPalette.light.surfaceHigh,
+    );
+  });
 }

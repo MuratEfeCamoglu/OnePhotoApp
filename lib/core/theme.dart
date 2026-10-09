@@ -294,6 +294,13 @@ ThemeData buildTheme(Brightness brightness) {
             s.contains(WidgetState.selected) ? Colors.transparent : p.dayMuted,
       ),
     ),
+    // Same white/dark card as the other dialogs instead of the M3 tint.
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: p.surfaceHigh,
+      hourMinuteColor: p.surface,
+      dialBackgroundColor: p.surface,
+      shape: _rounded(AppDimens.dialogRadius),
+    ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: p.snackbar,
       behavior: SnackBarBehavior.floating,

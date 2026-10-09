@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -33,7 +34,10 @@ class TimelineScreen extends StatefulWidget {
   State<TimelineScreen> createState() => _TimelineScreenState();
 }
 
-class _TimelineScreenState extends State<TimelineScreen> {
+class _TimelineScreenState extends State<TimelineScreen>
+    with WidgetsBindingObserver {
+  Timer? _midnight;
+
   final _scroll = ScrollController();
   final _galleryScroll = ScrollController();
   HomeTab _tab = HomeTab.timeline;
@@ -48,14 +52,37 @@ class _TimelineScreenState extends State<TimelineScreen> {
   void initState() {
     super.initState();
     _controller.addListener(_showPendingError);
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleMidnight();
   }
 
   @override
   void dispose() {
     _controller.removeListener(_showPendingError);
+    WidgetsBinding.instance.removeObserver(this);
+    _midnight?.cancel();
     _scroll.dispose();
     _galleryScroll.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    _controller.checkDayChange();
+    // Timers may not fire while the app sleeps; re-aim at the next midnight.
+    _scheduleMidnight();
+  }
+
+  void _scheduleMidnight() {
+    _midnight?.cancel();
+    _midnight = Timer(
+      _controller.untilMidnight() + const Duration(seconds: 1),
+      () {
+        _controller.checkDayChange();
+        _scheduleMidnight();
+      },
+    );
   }
 
   void _showPendingError() {

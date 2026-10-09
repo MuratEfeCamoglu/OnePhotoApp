@@ -137,4 +137,23 @@ void main() {
     await h.controller.load();
     expect(h.controller.fileExists(entry), isFalse);
   });
+
+  test('checkDayChange notifies only after the shown day passed', () async {
+    h = await TestHarness.create();
+    await h.controller.startup();
+    var notified = 0;
+    h.controller.addListener(() => notified++);
+    expect(h.controller.checkDayChange(), isFalse, reason: 'nothing shown');
+    expect(h.controller.todayKey, '2026-10-09');
+    expect(h.controller.checkDayChange(), isFalse, reason: 'same day');
+    h.now = DateTime(2026, 10, 10, 0, 0, 5);
+    expect(h.controller.checkDayChange(), isTrue);
+    expect(notified, 1);
+  });
+
+  test('untilMidnight counts down to the next local midnight', () async {
+    h = await TestHarness.create();
+    h.now = DateTime(2026, 10, 9, 23, 59, 30);
+    expect(h.controller.untilMidnight(), const Duration(seconds: 30));
+  });
 }
