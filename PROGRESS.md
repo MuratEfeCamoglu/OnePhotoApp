@@ -167,3 +167,10 @@ Doğrulama: format ✅, analyze ✅, 173/173 test ✅, `flutter build apk --rele
 - **Telefondaki siyah kareler:** test sırasında karanlıkta çekilen 9 Ekim fotoğrafı ve "demo veri" butonunun ürettiği 362 birebir kopyası (md5 `2d4515…`) telefondan silindi. Kullanıcının 1 ve 2 Ekim fotoğrafları korundu. Silmeden önce veritabanı yedeği alındı (scratchpad `one_photo_backup.db`). Gerçek cihazda v1→v2 şema geçişi doğrulandı.
 - Cihazda doğrulandı (Poco X3): alt çubuk, koyu tema, İngilizce, önizleme kartı, not yazma + geri tuşuyla kaydetme, not rozeti.
 Doğrulama: format ✅, analyze ✅, 196/196 test ✅.
+
+## Kategoriler (F12)
+- 16 kategori, her birinin simgesi ve rengi var: Yemek, Manzara, Seyahat, Aile, Arkadaşlar, Evcil hayvan, Doğa, Spor, İş, Okul, Kutlama, Aşk, Ev, Sanat, Müzik, Ben (İngilizce adlarıyla). `core/categories.dart`, `ui/widgets/category_style.dart`.
+- Seçim: fotoğraf eklenince açılan kartta ve gün önizlemesinde yatay kayan çipler; tek seçim, seçili çipe dokunmak kaldırır.
+- Gösterim: hücrede sol üstte renkli, simgeli rozet; tam ekran detayda kategori çipi.
+- Veri: `Entry.category`, şema v3 (`category TEXT`, eklemeli geçiş), `PhotoService.saveDetails`, `TimelineController.updateDetails`; fotoğraf değişince kategori korunur.
+Doğrulama: format ✅, analyze ✅, 221/221 test ✅.

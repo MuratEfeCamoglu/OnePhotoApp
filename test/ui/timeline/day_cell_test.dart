@@ -1,3 +1,5 @@
+import 'package:one_photo_app/core/categories.dart';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -156,5 +158,22 @@ void main() {
       DayCell(day: 3, label: '3', isToday: false, isFuture: false, photo: file),
     );
     expect(find.byKey(const ValueKey('note-badge')), findsNothing);
+  });
+
+  testWidgets('category badge on photo days with a category', (tester) async {
+    final file = writeSourcePhoto(dir);
+    await _pump(
+      tester,
+      DayCell(
+        day: 3,
+        label: '3',
+        isToday: false,
+        isFuture: false,
+        photo: file,
+        category: PhotoCategory.travel,
+      ),
+    );
+    expect(find.byKey(const ValueKey('category-badge')), findsOneWidget);
+    expect(find.byIcon(Icons.flight_takeoff_rounded), findsOneWidget);
   });
 }

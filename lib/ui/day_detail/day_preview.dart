@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../core/categories.dart';
 import '../../core/date_key.dart';
+import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../data/entry.dart';
 import '../../state/timeline_controller.dart';
 import '../timeline/day_cell.dart';
+import '../widgets/category_style.dart';
 import '../widgets/error_snackbar.dart';
 import '../widgets/l10n.dart';
 import '../widgets/motion.dart';
@@ -68,6 +71,9 @@ class _DayPreviewState extends State<DayPreview> {
   late final TextEditingController _note = TextEditingController(
     text: widget.controller.entryFor(widget.dateKey)?.note ?? '',
   );
+  late PhotoCategory? _category = widget.controller
+      .entryFor(widget.dateKey)
+      ?.category;
   bool _saved = false;
 
   @override
@@ -76,16 +82,22 @@ class _DayPreviewState extends State<DayPreview> {
     super.dispose();
   }
 
-  bool get _changed =>
-      _note.text.trim() !=
-      (widget.controller.entryFor(widget.dateKey)?.note ?? '');
+  bool get _changed {
+    final entry = widget.controller.entryFor(widget.dateKey);
+    return _note.text.trim() != (entry?.note ?? '') ||
+        _category != entry?.category;
+  }
 
   /// Saves the note if it changed; closing the card saves too.
   Future<void> _save() async {
     if (_saved || !_changed) return;
     _saved = true;
     try {
-      await widget.controller.updateNote(widget.dateKey, _note.text);
+      await widget.controller.updateDetails(
+        widget.dateKey,
+        note: _note.text,
+        category: _category,
+      );
     } on Exception catch (e) {
       _saved = false;
       if (mounted) showErrorSnackBar(context, e);
@@ -150,49 +162,27 @@ class _DayPreviewState extends State<DayPreview> {
                           if (entry != null) _photo(entry),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                            child: Text(
+                              formatLongDate(widget.dateKey, strings: s),
+                              style: AppText.headline.copyWith(
+                                color: p.onSurface,
+                              ),
+                            ),
+                          ),
+                          // Edge to edge so the chips scroll under the card
+                          // padding.
+                          CategoryPicker(
+                            selected: _category,
+                            onChanged: (c) => setState(() => _category = c),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text(
-                                  formatLongDate(widget.dateKey, strings: s),
-                                  style: AppText.headline.copyWith(
-                                    color: p.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
                                 _NoteField(controller: _note),
                                 const SizedBox(height: 14),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: TextButton.icon(
-                                          key: const ValueKey('open-full'),
-                                          onPressed: entry == null
-                                              ? null
-                                              : _openFull,
-                                          icon: const Icon(
-                                            Icons.open_in_full_rounded,
-                                            size: 18,
-                                          ),
-                                          label: Text(
-                                            s.fullScreen,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    PressScale(
-                                      child: FilledButton(
-                                        key: const ValueKey('save-note'),
-                                        onPressed: _saveAndClose,
-                                        child: Text(s.save),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                _actions(entry, s),
                               ],
                             ),
                           ),
@@ -209,6 +199,32 @@ class _DayPreviewState extends State<DayPreview> {
     );
   }
 
+  Widget _actions(Entry? entry, Strings s) {
+    return Row(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const ValueKey('open-full'),
+              onPressed: entry == null ? null : _openFull,
+              icon: const Icon(Icons.open_in_full_rounded, size: 18),
+              label: Text(s.fullScreen, overflow: TextOverflow.ellipsis),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        PressScale(
+          child: FilledButton(
+            key: const ValueKey('save-note'),
+            onPressed: _saveAndClose,
+            child: Text(s.save),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _photo(Entry entry) {
     final file = widget.controller.fileFor(entry);
     final p = context.palette;
@@ -222,6 +238,7 @@ class _DayPreviewState extends State<DayPreview> {
     final typing = MediaQuery.viewInsetsOf(context).bottom > 0;
     return LayoutBuilder(
       builder: (context, constraints) => AnimatedContainer(
+        key: const ValueKey('preview-photo'),
         duration: AppMotion.medium,
         curve: AppMotion.curve,
         height: typing ? 120 : constraints.maxWidth,

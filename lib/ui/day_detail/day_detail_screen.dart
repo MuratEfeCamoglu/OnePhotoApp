@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../state/timeline_controller.dart';
 import '../timeline/day_cell.dart';
 import '../widgets/add_photo_flow.dart';
+import '../widgets/category_style.dart';
 import '../widgets/error_snackbar.dart';
 import '../widgets/l10n.dart';
 import '../widgets/motion.dart';
@@ -74,7 +75,8 @@ class DayDetailScreen extends StatelessWidget {
               ),
             ),
           );
-          if (!entry.hasNote) return viewer;
+          final category = entry.category;
+          if (!entry.hasNote && category == null) return viewer;
           return Column(
             children: [
               Expanded(child: viewer),
@@ -87,9 +89,26 @@ class DayDetailScreen extends StatelessWidget {
                   color: p.surface,
                   borderRadius: BorderRadius.circular(AppDimens.cardRadius),
                 ),
-                child: Text(
-                  entry.note!,
-                  style: AppText.body.copyWith(color: p.onSurface, height: 1.4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (category != null)
+                      CategoryChip(
+                        key: const ValueKey('detail-category'),
+                        category: category,
+                        selected: true,
+                      ),
+                    if (category != null && entry.hasNote)
+                      const SizedBox(height: 12),
+                    if (entry.hasNote)
+                      Text(
+                        entry.note!,
+                        style: AppText.body.copyWith(
+                          color: p.onSurface,
+                          height: 1.4,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -114,8 +133,12 @@ class DayDetailScreen extends StatelessWidget {
                     label: s.replace,
                     background: p.surface,
                     foreground: p.onSurface,
-                    onPressed: () =>
-                        chooseSourceAndAdd(context, controller, dateKey),
+                    onPressed: () => chooseSourceAndAdd(
+                      context,
+                      controller,
+                      dateKey,
+                      showDetails: false,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

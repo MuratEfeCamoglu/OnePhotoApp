@@ -1,3 +1,4 @@
+import 'package:one_photo_app/core/categories.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:one_photo_app/data/entry.dart';
 
@@ -18,6 +19,7 @@ void main() {
       'created_at': 1760000000000,
       'updated_at': 1760000005000,
       'note': null,
+      'category': null,
     });
   });
 
@@ -53,5 +55,15 @@ void main() {
   test('rows written before notes existed read as no note', () {
     final legacy = Map.of(entry.toMap())..remove('note');
     expect(Entry.fromMap(legacy).note, isNull);
+  });
+
+  test('category round-trips and withDetails replaces both fields', () {
+    final e = entry.withDetails(note: 'n', category: PhotoCategory.food);
+    expect(Entry.fromMap(e.toMap()), e);
+    expect(e.toMap()['category'], 'food');
+    final cleared = e.withDetails(note: null, category: null);
+    expect(cleared.note, isNull);
+    expect(cleared.category, isNull);
+    expect(e.withNote('x').category, PhotoCategory.food);
   });
 }

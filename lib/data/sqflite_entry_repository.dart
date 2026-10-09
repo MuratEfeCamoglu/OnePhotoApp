@@ -15,7 +15,8 @@ class SqfliteEntryRepository implements EntryRepository {
   /// Schema version; bumping it requires a migration in [_upgrade].
   ///
   /// 1: initial table. 2: nullable `note` column (ISKELET F11).
-  static const schemaVersion = 2;
+  /// 3: nullable `category` column (ISKELET F12).
+  static const schemaVersion = 3;
 
   static const _table = 'entries';
 
@@ -36,7 +37,8 @@ class SqfliteEntryRepository implements EntryRepository {
             file_name TEXT NOT NULL,
             created_at INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
-            note TEXT
+            note TEXT,
+            category TEXT
           )
         '''),
         onUpgrade: _upgrade,
@@ -48,6 +50,9 @@ class SqfliteEntryRepository implements EntryRepository {
   // Additive steps only, so existing photos stay reachable after updates.
   static Future<void> _upgrade(Database db, int from, int to) async {
     if (from < 2) await db.execute('ALTER TABLE $_table ADD COLUMN note TEXT');
+    if (from < 3) {
+      await db.execute('ALTER TABLE $_table ADD COLUMN category TEXT');
+    }
   }
 
   /// Closes the underlying database.

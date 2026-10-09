@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../core/calendar.dart';
+import '../core/categories.dart';
 import '../core/clock.dart';
 import '../core/date_key.dart';
 import '../data/entry.dart';
@@ -101,7 +102,22 @@ class TimelineController extends ChangeNotifier {
 
   /// Saves the note of [dateKey]'s photo; blank text removes it.
   Future<void> updateNote(String dateKey, String note) async {
-    final updated = await _service.saveNote(dateKey, note);
+    final entry = _entries[dateKey];
+    if (entry == null) return;
+    await updateDetails(dateKey, note: note, category: entry.category);
+  }
+
+  /// Saves note and category of [dateKey]'s photo (ISKELET F11, F12).
+  Future<void> updateDetails(
+    String dateKey, {
+    required String note,
+    required PhotoCategory? category,
+  }) async {
+    final updated = await _service.saveDetails(
+      dateKey,
+      note: note,
+      category: category,
+    );
     if (updated == null || updated == _entries[dateKey]) return;
     _entries[dateKey] = updated;
     notifyListeners();

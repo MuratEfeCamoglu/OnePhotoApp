@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../data/entry.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
+import '../day_detail/day_preview.dart';
 import 'error_snackbar.dart';
 import 'l10n.dart';
 import 'photo_source_sheet.dart';
@@ -42,13 +43,16 @@ Future<bool> confirmAction(
 /// Adds a photo from [source] to [dateKey].
 ///
 /// Asks before replacing an existing photo (ISKELET F4b) and turns
-/// expected errors into SnackBars (F8). Returns the saved entry or `null`.
+/// expected errors into SnackBars (F8). With [showDetails] the preview card
+/// opens afterwards to pick a category and write a note (F11, F12).
+/// Returns the saved entry or `null`.
 Future<Entry?> addPhotoFlow(
   BuildContext context,
   TimelineController controller,
   String dateKey,
-  PhotoSource source,
-) async {
+  PhotoSource source, {
+  bool showDetails = true,
+}) async {
   if (controller.entryFor(dateKey) != null) {
     final replace = await confirmAction(
       context,
@@ -57,24 +61,36 @@ Future<Entry?> addPhotoFlow(
     );
     if (!replace || !context.mounted) return null;
   }
+  final Entry? entry;
   try {
-    return await controller.addPhoto(dateKey, source);
+    entry = await controller.addPhoto(dateKey, source);
   } on Exception catch (e) {
     if (context.mounted) showErrorSnackBar(context, e);
     return null;
   }
+  if (entry != null && showDetails && context.mounted) {
+    await showDayPreview(context, controller, dateKey);
+  }
+  return entry;
 }
 
 /// Opens the source sheet for [dateKey], then runs [addPhotoFlow].
 Future<Entry?> chooseSourceAndAdd(
   BuildContext context,
   TimelineController controller,
-  String dateKey,
-) async {
+  String dateKey, {
+  bool showDetails = true,
+}) async {
   final source = await showPhotoSourceSheet(
     context,
     title: formatShortDate(dateKey, strings: context.strings),
   );
   if (source == null || !context.mounted) return null;
-  return addPhotoFlow(context, controller, dateKey, source);
+  return addPhotoFlow(
+    context,
+    controller,
+    dateKey,
+    source,
+    showDetails: showDetails,
+  );
 }

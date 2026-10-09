@@ -1,3 +1,4 @@
+import 'package:one_photo_app/core/categories.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:one_photo_app/core/calendar.dart';
 import 'package:one_photo_app/core/errors.dart';
@@ -106,5 +107,22 @@ void main() {
     expect(notified, 1);
     await h.controller.updateNote('2026-10-01', 'Merhaba');
     expect(notified, 1, reason: 'unchanged note does not rebuild');
+  });
+
+  test('updateDetails stores category and notifies', () async {
+    h = await TestHarness.create(photoDays: ['2026-10-01']);
+    await h.controller.startup();
+    var notified = 0;
+    h.controller.addListener(() => notified++);
+    await h.controller.updateDetails(
+      '2026-10-01',
+      note: '',
+      category: PhotoCategory.friends,
+    );
+    expect(
+      h.controller.entryFor('2026-10-01')!.category,
+      PhotoCategory.friends,
+    );
+    expect(notified, 1);
   });
 }

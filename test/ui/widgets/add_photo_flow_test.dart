@@ -1,3 +1,6 @@
+import 'package:one_photo_app/ui/widgets/category_style.dart';
+import 'package:one_photo_app/ui/day_detail/day_preview.dart';
+import 'package:one_photo_app/core/categories.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -151,5 +154,48 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(result, isTrue);
+  });
+
+  testWidgets('after adding, the details card opens for category and note', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    h.picker.cameraResult = writeSourcePhoto(h.root);
+    await pumpButton(
+      tester,
+      (c) => addPhotoFlow(c, h.controller, '2026-10-09', PhotoSource.camera),
+    );
+    expect(find.byType(DayPreview), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('category-family')),
+      120,
+      scrollable: find.descendant(
+        of: find.byType(CategoryPicker),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('category-family')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('save-note')));
+    await tester.pumpAndSettle();
+    expect(h.repo.rows['2026-10-09']!.category, PhotoCategory.family);
+  });
+
+  testWidgets('showDetails: false skips the details card', (tester) async {
+    h = await TestHarness.create();
+    h.picker.cameraResult = writeSourcePhoto(h.root);
+    await pumpButton(
+      tester,
+      (c) => addPhotoFlow(
+        c,
+        h.controller,
+        '2026-10-09',
+        PhotoSource.camera,
+        showDetails: false,
+      ),
+    );
+    expect(find.byType(DayPreview), findsNothing);
+    expect(h.repo.rows, hasLength(1));
   });
 }

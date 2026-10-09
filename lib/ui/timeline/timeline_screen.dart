@@ -139,6 +139,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                       },
                       hasNote: (key) =>
                           _controller.entryFor(key)?.hasNote ?? false,
+                      categoryFor: (key) => _controller.entryFor(key)?.category,
                       onDayTap: _onDayTap,
                     ),
                   );

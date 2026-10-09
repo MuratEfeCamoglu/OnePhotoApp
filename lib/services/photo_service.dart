@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import '../core/categories.dart';
 import '../core/clock.dart';
 import '../core/date_key.dart';
 import '../core/errors.dart';
@@ -69,6 +70,7 @@ class PhotoService {
       updatedAt: now,
       // A new photo does not erase what the user wrote about the day.
       note: existing?.note,
+      category: existing?.category,
     );
     try {
       await _repository.upsert(entry);
@@ -81,22 +83,38 @@ class PhotoService {
     return entry;
   }
 
-  /// Stores [note] for the photo of [dateKey] (ISKELET F11).
+  /// Stores [note] for the photo of [dateKey], keeping its category.
+  Future<Entry?> saveNote(String dateKey, String note) async {
+    final existing = await _guard(() => _repository.getByDate(dateKey));
+    if (existing == null) return null;
+    return saveDetails(dateKey, note: note, category: existing.category);
+  }
+
+  /// Stores [note] and [category] for the photo of [dateKey]
+  /// (ISKELET F11, F12).
   ///
   /// Blank notes are removed. Returns the updated entry, or `null` when the
   /// day has no photo.
-  Future<Entry?> saveNote(String dateKey, String note) async {
+  Future<Entry?> saveDetails(
+    String dateKey, {
+    required String note,
+    required PhotoCategory? category,
+  }) async {
     final existing = await _guard(() => _repository.getByDate(dateKey));
     if (existing == null) return null;
     final trimmed = note.trim();
     final clipped = trimmed.length > Entry.maxNoteLength
         ? trimmed.substring(0, Entry.maxNoteLength)
         : trimmed;
-    final updated = existing.withNote(
-      clipped.isEmpty ? null : clipped,
+    final updated = existing.withDetails(
+      note: clipped.isEmpty ? null : clipped,
+      category: category,
       updatedAt: _clock(),
     );
-    if (updated.note == existing.note) return existing;
+    if (updated.note == existing.note &&
+        updated.category == existing.category) {
+      return existing;
+    }
     await _repository.upsert(updated);
     return updated;
   }

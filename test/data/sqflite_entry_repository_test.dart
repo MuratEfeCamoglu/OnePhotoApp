@@ -1,3 +1,5 @@
+import 'package:one_photo_app/core/categories.dart';
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -108,6 +110,61 @@ void main() {
     expect(rows.single.note, isNull);
     await migrated.upsert(rows.single.withNote('yeni'));
     expect((await migrated.getByDate('2026-10-01'))!.note, 'yeni');
+    await migrated.close();
+  });
+
+  test('stores and reads a category (F12)', () async {
+    await repo.upsert(
+      _entry(
+        '2026-10-09',
+        'a.jpg',
+      ).withDetails(note: null, category: PhotoCategory.travel),
+    );
+    expect(
+      (await repo.getByDate('2026-10-09'))!.category,
+      PhotoCategory.travel,
+    );
+  });
+
+  test('v2 database migrates to v3 keeping notes (F12)', () async {
+    final dir = await Directory.systemTemp.createTemp('onephoto_migrate3');
+    addTearDown(() => dir.delete(recursive: true));
+    final path = p.join(dir.path, SqfliteEntryRepository.fileName);
+    // Exactly the schema shipped as version 2.
+    final v2 = await databaseFactoryFfi.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: 2,
+        onCreate: (db, _) => db.execute(
+          'CREATE TABLE entries (date_key TEXT PRIMARY KEY, '
+          'file_name TEXT NOT NULL, created_at INTEGER NOT NULL, '
+          'updated_at INTEGER NOT NULL, note TEXT)',
+        ),
+      ),
+    );
+    await v2.insert('entries', {
+      'date_key': '2026-10-02',
+      'file_name': 'b.jpg',
+      'created_at': 1,
+      'updated_at': 2,
+      'note': 'kalsın',
+    });
+    await v2.close();
+
+    final migrated = await SqfliteEntryRepository.open(
+      databaseFactoryFfi,
+      path,
+    );
+    final row = (await migrated.getAll()).single;
+    expect(row.note, 'kalsın');
+    expect(row.category, isNull);
+    await migrated.upsert(
+      row.withDetails(note: row.note, category: PhotoCategory.home),
+    );
+    expect(
+      (await migrated.getByDate('2026-10-02'))!.category,
+      PhotoCategory.home,
+    );
     await migrated.close();
   });
 }

@@ -1,3 +1,5 @@
+import 'categories.dart';
+
 /// Languages the UI can be shown in (ISKELET F10).
 enum AppLanguage {
   tr('tr', 'TR', 'Türkçe'),
@@ -59,6 +61,11 @@ abstract class Strings {
   String get replace;
   String get deleteQuestion;
   String get delete;
+
+  String get categoryLabel;
+
+  /// Display name of [category].
+  String categoryName(PhotoCategory category);
 
   String get noteLabel;
   String get noteHint;
@@ -146,6 +153,27 @@ class _TrStrings extends Strings {
   @override
   String get delete => 'Sil';
 
+  @override
+  String get categoryLabel => 'Kategori';
+  @override
+  String categoryName(PhotoCategory category) => switch (category) {
+    PhotoCategory.food => 'Yemek',
+    PhotoCategory.view => 'Manzara',
+    PhotoCategory.travel => 'Seyahat',
+    PhotoCategory.family => 'Aile',
+    PhotoCategory.friends => 'Arkadaşlar',
+    PhotoCategory.pet => 'Evcil hayvan',
+    PhotoCategory.nature => 'Doğa',
+    PhotoCategory.sport => 'Spor',
+    PhotoCategory.work => 'İş',
+    PhotoCategory.study => 'Okul',
+    PhotoCategory.celebration => 'Kutlama',
+    PhotoCategory.love => 'Aşk',
+    PhotoCategory.home => 'Ev',
+    PhotoCategory.art => 'Sanat',
+    PhotoCategory.music => 'Müzik',
+    PhotoCategory.me => 'Ben',
+  };
   @override
   String get noteLabel => 'Günün notu';
   @override
@@ -256,6 +284,27 @@ class _EnStrings extends Strings {
   @override
   String get delete => 'Delete';
 
+  @override
+  String get categoryLabel => 'Category';
+  @override
+  String categoryName(PhotoCategory category) => switch (category) {
+    PhotoCategory.food => 'Food',
+    PhotoCategory.view => 'View',
+    PhotoCategory.travel => 'Travel',
+    PhotoCategory.family => 'Family',
+    PhotoCategory.friends => 'Friends',
+    PhotoCategory.pet => 'Pet',
+    PhotoCategory.nature => 'Nature',
+    PhotoCategory.sport => 'Sport',
+    PhotoCategory.work => 'Work',
+    PhotoCategory.study => 'Study',
+    PhotoCategory.celebration => 'Celebration',
+    PhotoCategory.love => 'Love',
+    PhotoCategory.home => 'Home',
+    PhotoCategory.art => 'Art',
+    PhotoCategory.music => 'Music',
+    PhotoCategory.me => 'Me',
+  };
   @override
   String get noteLabel => 'Note of the day';
   @override

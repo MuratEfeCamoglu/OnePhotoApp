@@ -33,6 +33,7 @@ Terimler: **Gün anahtarı** = cihazın yerel saat dilimine göre `YYYY-MM-DD` m
 | F9 | **Koyu tema** | Önemli | (a) Ayarlar'da "Görünüm" seçimi: Sistem / Açık / Koyu; varsayılan Sistem. (b) Seçim anında, animasyonlu uygulanır ve yeniden başlatmada korunur. (c) Koyu temada tüm ekranlar koyu paletle okunaklıdır. |
 | F10 | **Dil seçimi** | Önemli | (a) Ayarlar'da "Dil" seçimi: Türkçe / English; varsayılan Türkçe. (b) Seçim anında tüm metinleri, ay/gün adlarını, tarih biçimini ve sistem diyaloglarını değiştirir; yeniden başlatmada korunur. (c) Açık hatırlatmanın bildirim metni seçili dile geçer. |
 | F11 | **Gün önizlemesi ve not** | Önemli | (a) Fotoğraflı güne dokununca kare fotoğraflı, sabit boyutlu bir önizleme kartı açılır (tarih + not alanı + "Tam ekran" + "Kaydet"). (b) Not en fazla 500 karakterdir; "Kaydet", geri tuşu veya kart dışına dokunma notu kaydeder; boş not silinir. (c) Notu olan günün hücresinde küçük not işareti görünür; tam ekran detayda not fotoğrafın altında gösterilir. (d) Fotoğraf değiştirilince not korunur. (e) Klavye açıkken fotoğraf küçülür, not alanı ve butonlar görünür kalır. |
+| F12 | **Kategori** | Önemli | (a) Uygulama sabit bir kategori listesi sunar; her birinin simgesi ve rengi vardır: Yemek, Manzara, Seyahat, Aile, Arkadaşlar, Evcil hayvan, Doğa, Spor, İş, Okul, Kutlama, Aşk, Ev, Sanat, Müzik, Ben. (b) Fotoğraf eklendikten hemen sonra ve gün önizlemesinde (F11) yatay kaydırılan çiplerden en fazla bir kategori seçilir; seçili çipe tekrar dokunmak seçimi kaldırır. (c) Kategorili günün hücresinde kategori renginde, simgeli küçük rozet; tam ekran detayda kategori çipi görünür. (d) Fotoğraf değiştirilince kategori korunur. (e) Kategori adları seçili dilde (F10) görünür. |
 
 ### Sonraki Sürümler (MVP sonrası, şimdi yapılmayacak)
 - Güne ruh hali ekleme.
@@ -72,7 +73,7 @@ Terimler: **Gün anahtarı** = cihazın yerel saat dilimine göre `YYYY-MM-DD` m
 - **Navigasyon:** Navigator 1.0 (`MaterialPageRoute`). Ekranlar: Timeline (ana) → DayDetail, Timeline → Settings.
 - **Veri modeli:**
 
-  `entries` tablosu (sqflite, veritabanı dosyası `one_photo.db`, şema sürümü 2):
+  `entries` tablosu (sqflite, veritabanı dosyası `one_photo.db`, şema sürümü 3):
 
   | Sütun | Tip | Kural |
   |---|---|---|
@@ -81,8 +82,9 @@ Terimler: **Gün anahtarı** = cihazın yerel saat dilimine göre `YYYY-MM-DD` m
   | `created_at` | INTEGER | NOT NULL, epoch ms (kaydın ilk oluşturulması) |
   | `updated_at` | INTEGER | NOT NULL, epoch ms (son değiştirme) |
   | `note` | TEXT | NULL olabilir, en fazla 500 karakter (F11; şema v2'de eklendi) |
+  | `category` | TEXT | NULL olabilir; `PhotoCategory` kimliği, örn. `food` (F12; şema v3'te eklendi) |
 
-  Dart modeli: `Entry { String dateKey; String fileName; DateTime createdAt; DateTime updatedAt; String? note; }` — değişmez (immutable), `toMap()` / `fromMap()` içerir.
+  Dart modeli: `Entry { String dateKey; String fileName; DateTime createdAt; DateTime updatedAt; String? note; PhotoCategory? category; }` — değişmez (immutable), `toMap()` / `fromMap()` içerir.
 
   Ayarlar (shared_preferences): `reminder_enabled: bool` (varsayılan `false`), `reminder_minutes: int` (gece yarısından itibaren dakika, varsayılan `1200` = 20:00), `pending_date_key: String?` (açık bir picker işleminin hedef günü; işlem bitince silinir).
 
@@ -210,3 +212,4 @@ Toplam tahmin: ~10 gün (6–12 gün aralığında).
 - **V19 — Kapsam değişikliği (kullanıcı isteği, 2026-10-09):** Koyu tema (F9) ve İngilizce dil desteği (F10) "Sonraki Sürümler"den MVP kapsamına alındı. F1g, referans ekran görüntüsüne uygun olarak alt yüzen gezinme çubuğuna (ana sayfa / kamera / ayarlar) çevrildi. V6 ve V12 bu yönde güncellenmiş sayılır.
 - **V20 — Saat biçimi:** Hatırlatma saati her iki dilde de 24 saat biçiminde gösterilir ve seçilir.
 - **V21 — Şema v2 (kullanıcı isteği, 2026-10-09):** Gün notu için `entries` tablosuna NULL olabilen `note TEXT` sütunu eklendi. Geçiş yalnızca ekleme yapar (`ALTER TABLE … ADD COLUMN`), mevcut kayıtlar ve dosyalar değişmez; v1→v2 geçişi otomatik testle ve gerçek cihazda doğrulandı.
+- **V22 — Kategoriler ve şema v3 (kullanıcı isteği, 2026-10-09):** Kategoriler kullanıcı tarafından eklenemez, uygulama listesinden seçilir; gün başına en fazla bir kategori. Veritabanında enum adı (`food`, `travel`…) saklanır, bu yüzden değerler yeniden adlandırılmaz, yalnızca eklenir. Şema v3 eklemeli geçiştir (`ADD COLUMN category TEXT`); v2→v3 geçişi testle doğrulandı. Fotoğraf eklendikten sonra kategori/not kartı kendiliğinden açılır (kapatılabilir; fotoğraf zaten kaydedilmiştir, F2'nin 3 dokunuş ölçütü etkilenmez).

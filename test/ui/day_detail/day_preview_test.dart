@@ -1,8 +1,10 @@
+import 'package:one_photo_app/core/categories.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:one_photo_app/core/strings.dart';
 import 'package:one_photo_app/data/entry.dart';
+import 'package:one_photo_app/ui/widgets/category_style.dart';
 import 'package:one_photo_app/ui/day_detail/day_detail_screen.dart';
 import 'package:one_photo_app/ui/day_detail/day_preview.dart';
 
@@ -147,12 +149,8 @@ void main() {
   testWidgets('photo shrinks while the keyboard is open', (tester) async {
     h = await TestHarness.create(photoDays: ['2026-10-05']);
     await openPreview(tester, '2026-10-05');
-    Size photoSize() => tester.getSize(
-      find.descendant(
-        of: find.byType(DayPreview),
-        matching: find.byType(AnimatedContainer),
-      ),
-    );
+    Size photoSize() =>
+        tester.getSize(find.byKey(const ValueKey('preview-photo')));
     expect(photoSize().height, greaterThan(250));
 
     tester.view.viewInsets = const FakeViewPadding(bottom: 900);
@@ -163,5 +161,57 @@ void main() {
       find.byKey(const ValueKey('save-note')).hitTestable(),
       findsOneWidget,
     );
+  });
+
+  testWidgets('choosing a category and saving stores it (F12)', (tester) async {
+    h = await TestHarness.create(photoDays: ['2026-10-05']);
+    await openPreview(tester, '2026-10-05');
+    expect(find.text('Yemek'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('category-travel')),
+      120,
+      scrollable: find.descendant(
+        of: find.byType(CategoryPicker),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('category-travel')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('save-note')));
+    await tester.pumpAndSettle();
+
+    expect(h.repo.rows['2026-10-05']!.category, PhotoCategory.travel);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('day-2026-10-05')),
+        matching: find.byKey(const ValueKey('category-badge')),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('changing only the category counts as a change', (tester) async {
+    h = await TestHarness.create(photoDays: ['2026-10-05']);
+    await openPreview(tester, '2026-10-05');
+    await tester.tap(find.byKey(const ValueKey('category-food')));
+    await tester.pump();
+    tester.state<NavigatorState>(find.byType(Navigator)).maybePop();
+    await tester.pumpAndSettle();
+    expect(h.repo.rows['2026-10-05']!.category, PhotoCategory.food);
+  });
+
+  testWidgets('full screen detail shows the category', (tester) async {
+    h = await TestHarness.create(photoDays: ['2026-10-05']);
+    final e = h.repo.rows['2026-10-05']!;
+    h.repo.rows['2026-10-05'] = e.withDetails(
+      note: null,
+      category: PhotoCategory.pet,
+    );
+    await openPreview(tester, '2026-10-05');
+    await tester.tap(find.byKey(const ValueKey('open-full')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('detail-category')), findsOneWidget);
+    expect(find.text('Evcil hayvan'), findsOneWidget);
   });
 }

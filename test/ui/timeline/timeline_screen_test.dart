@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:one_photo_app/core/date_key.dart';
 import 'package:one_photo_app/core/strings.dart';
+import 'package:one_photo_app/ui/day_detail/day_preview.dart';
 import 'package:one_photo_app/ui/settings/settings_screen.dart';
 import 'package:one_photo_app/ui/timeline/day_cell.dart';
 import 'package:one_photo_app/ui/timeline/month_grid.dart';
@@ -130,6 +131,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(h.picker.cameraCalls, 1);
+    // The details card opens right after adding (ISKELET F11, F12).
+    expect(find.byType(DayPreview), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('save-note')));
+    await tester.pumpAndSettle();
     expect(thumbIn('2026-10-09'), findsOneWidget);
     expect(find.text(Strings.tr.emptyTimeline), findsNothing);
   });
@@ -176,6 +181,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('5 Ekim 2026'), findsOneWidget);
     await tester.tap(find.text(Strings.tr.pickFromGallery));
+    await tester.pumpAndSettle();
+    expect(find.byType(DayPreview), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('save-note')));
     await tester.pumpAndSettle();
 
     expect(thumbIn('2026-10-05'), findsOneWidget);

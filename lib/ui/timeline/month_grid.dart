@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../core/calendar.dart';
+import '../../core/categories.dart';
 import '../../core/date_key.dart';
 import '../../core/strings.dart';
 import '../../core/theme.dart';
@@ -19,6 +20,7 @@ class MonthGrid extends StatelessWidget {
     required this.photoFor,
     required this.onDayTap,
     this.hasNote,
+    this.categoryFor,
   });
 
   /// Month to render.
@@ -32,6 +34,9 @@ class MonthGrid extends StatelessWidget {
 
   /// Whether a day has a note (ISKELET F11); none when `null`.
   final bool Function(String dateKey)? hasNote;
+
+  /// Category of a day (ISKELET F12); none when `null`.
+  final PhotoCategory? Function(String dateKey)? categoryFor;
 
   /// Called with the day key of a tapped (non-future) cell.
   final ValueChanged<String> onDayTap;
@@ -92,6 +97,7 @@ class MonthGrid extends StatelessWidget {
       photo: photo,
       heroTag: photo == null ? null : photoHeroTag(key),
       hasNote: hasNote?.call(key) ?? false,
+      category: categoryFor?.call(key),
       onTap: () => onDayTap(key),
     );
   }

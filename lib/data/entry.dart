@@ -1,3 +1,5 @@
+import '../core/categories.dart';
+
 /// One day's photo record (row of the `entries` table).
 class Entry {
   /// Creates an immutable entry.
@@ -7,6 +9,7 @@ class Entry {
     required this.createdAt,
     required this.updatedAt,
     this.note,
+    this.category,
   });
 
   /// Reads a row produced by [toMap].
@@ -16,6 +19,7 @@ class Entry {
     createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']! as int),
     updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at']! as int),
     note: map['note'] as String?,
+    category: PhotoCategory.fromId(map['category'] as String?),
   );
 
   /// Longest note a day can hold (ISKELET F11).
@@ -36,6 +40,9 @@ class Entry {
   /// The user's note for the day, `null` when there is none (ISKELET F11).
   final String? note;
 
+  /// The chosen category, `null` when none (ISKELET F12).
+  final PhotoCategory? category;
+
   /// Whether the day has a non-empty note.
   bool get hasNote => note != null && note!.isNotEmpty;
 
@@ -46,9 +53,10 @@ class Entry {
     'created_at': createdAt.millisecondsSinceEpoch,
     'updated_at': updatedAt.millisecondsSinceEpoch,
     'note': note,
+    'category': category?.id,
   };
 
-  /// Copy with the given fields replaced; the note is kept.
+  /// Copy with the given fields replaced; note and category are kept.
   Entry copyWith({
     String? dateKey,
     String? fileName,
@@ -60,15 +68,25 @@ class Entry {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     note: note,
+    category: category,
   );
 
   /// Copy with [note] replaced; `null` removes it.
-  Entry withNote(String? note, {DateTime? updatedAt}) => Entry(
+  Entry withNote(String? note, {DateTime? updatedAt}) =>
+      withDetails(note: note, category: category, updatedAt: updatedAt);
+
+  /// Copy with both [note] and [category] replaced; `null` removes them.
+  Entry withDetails({
+    required String? note,
+    required PhotoCategory? category,
+    DateTime? updatedAt,
+  }) => Entry(
     dateKey: dateKey,
     fileName: fileName,
     createdAt: createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     note: note,
+    category: category,
   );
 
   @override
@@ -78,11 +96,12 @@ class Entry {
       other.fileName == fileName &&
       other.createdAt == createdAt &&
       other.updatedAt == updatedAt &&
-      other.note == note;
+      other.note == note &&
+      other.category == category;
 
   @override
   int get hashCode =>
-      Object.hash(dateKey, fileName, createdAt, updatedAt, note);
+      Object.hash(dateKey, fileName, createdAt, updatedAt, note, category);
 
   @override
   String toString() => 'Entry($dateKey, $fileName)';

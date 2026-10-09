@@ -1,3 +1,5 @@
+import 'package:one_photo_app/core/categories.dart';
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -271,6 +273,53 @@ void main() {
       now = now.add(const Duration(minutes: 1));
       final replaced = await service.savePhoto('2026-10-09', source('b.jpg'));
       expect(replaced.note, 'Kalsın');
+    });
+  });
+
+  group('saveDetails (F12)', () {
+    test('stores category with the note', () async {
+      await service.savePhoto('2026-10-09', source());
+      final e = await service.saveDetails(
+        '2026-10-09',
+        note: 'Akşam yemeği',
+        category: PhotoCategory.food,
+      );
+      expect(e!.category, PhotoCategory.food);
+      expect(repo.rows['2026-10-09']!.note, 'Akşam yemeği');
+    });
+
+    test('category can be cleared', () async {
+      await service.savePhoto('2026-10-09', source());
+      await service.saveDetails(
+        '2026-10-09',
+        note: '',
+        category: PhotoCategory.pet,
+      );
+      await service.saveDetails('2026-10-09', note: '', category: null);
+      expect(repo.rows['2026-10-09']!.category, isNull);
+    });
+
+    test('saveNote keeps the category', () async {
+      await service.savePhoto('2026-10-09', source());
+      await service.saveDetails(
+        '2026-10-09',
+        note: '',
+        category: PhotoCategory.pet,
+      );
+      await service.saveNote('2026-10-09', 'Kedi');
+      expect(repo.rows['2026-10-09']!.category, PhotoCategory.pet);
+    });
+
+    test('replacing the photo keeps the category', () async {
+      await service.savePhoto('2026-10-09', source('a.jpg'));
+      await service.saveDetails(
+        '2026-10-09',
+        note: '',
+        category: PhotoCategory.view,
+      );
+      now = now.add(const Duration(minutes: 1));
+      final replaced = await service.savePhoto('2026-10-09', source('b.jpg'));
+      expect(replaced.category, PhotoCategory.view);
     });
   });
 }

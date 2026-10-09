@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../core/categories.dart';
 import '../../core/theme.dart';
+import '../widgets/category_style.dart';
 import '../widgets/motion.dart';
 
 /// Hero tag shared by a day's grid thumbnail and its detail photo.
@@ -20,6 +22,7 @@ class DayCell extends StatelessWidget {
     this.photo,
     this.heroTag,
     this.hasNote = false,
+    this.category,
     this.onTap,
   });
 
@@ -44,6 +47,9 @@ class DayCell extends StatelessWidget {
   /// Shows a small note badge on the photo (ISKELET F11).
   final bool hasNote;
 
+  /// Category badge shown on the photo (ISKELET F12).
+  final PhotoCategory? category;
+
   /// Called on tap; ignored for future days.
   final VoidCallback? onTap;
 
@@ -64,6 +70,7 @@ class DayCell extends StatelessWidget {
         bold: isToday,
         heroTag: heroTag,
         hasNote: hasNote,
+        category: category,
       );
     } else if (missing) {
       content = _MissingContent(key: const ValueKey('missing'), day: day);
@@ -155,6 +162,7 @@ class _PhotoContent extends StatelessWidget {
     required this.bold,
     this.heroTag,
     this.hasNote = false,
+    this.category,
   });
 
   final File file;
@@ -162,6 +170,7 @@ class _PhotoContent extends StatelessWidget {
   final bool bold;
   final String? heroTag;
   final bool hasNote;
+  final PhotoCategory? category;
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +208,16 @@ class _PhotoContent extends StatelessWidget {
               ),
             ),
           ),
+          if (category != null)
+            Positioned(
+              top: 3,
+              left: 3,
+              child: CategoryBadge(
+                key: const ValueKey('category-badge'),
+                category: category!,
+                size: 14,
+              ),
+            ),
           if (hasNote)
             const Positioned(
               top: 3,
