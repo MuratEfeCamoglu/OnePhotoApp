@@ -35,22 +35,18 @@ class MonthGrid extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppDimens.gutter,
-        20,
+        24,
         AppDimens.gutter,
-        4,
+        0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 2, bottom: 10),
+            padding: const EdgeInsets.only(bottom: 12),
             child: Text(
               formatMonthTitle(month.year, month.month),
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: AppColors.onSurface,
-              ),
+              style: AppText.month,
             ),
           ),
           GridView.count(
@@ -58,6 +54,8 @@ class MonthGrid extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
+            // Today's ring sits just outside its cell.
+            clipBehavior: Clip.none,
             mainAxisSpacing: AppDimens.cellGap,
             crossAxisSpacing: AppDimens.cellGap,
             children: [
@@ -74,13 +72,15 @@ class MonthGrid extends StatelessWidget {
     final key = dateKeyOf(DateTime(month.year, month.month, day));
     // Day keys sort chronologically as plain strings.
     final compare = key.compareTo(todayKey);
+    final photo = photoFor(key);
     return DayCell(
       key: ValueKey('day-$key'),
       day: day,
       label: formatShortDate(key),
       isToday: compare == 0,
       isFuture: compare > 0,
-      photo: photoFor(key),
+      photo: photo,
+      heroTag: photo == null ? null : photoHeroTag(key),
       onTap: () => onDayTap(key),
     );
   }

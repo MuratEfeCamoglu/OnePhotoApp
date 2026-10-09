@@ -40,11 +40,11 @@ Debug ve profile derlemelerinde Ayarlar ekranında **"365 günlük demo veri ür
 | Ölçüt | Hedef | Sonuç | Yöntem |
 |---|---|---|---|
 | Bugünün fotoğrafı (bugün boşken) | ≤ 3 dokunuş | ✅ **3 dokunuş**: kamera ikonu → deklanşör → kameranın onay butonu; küçük resim ≤ 1,5 sn içinde bugünün hücresinde | Cihazda `adb` ile adım adım + ekran görüntüsü; widget testi `timeline_screen_test` |
-| 365 fotoğrafla soğuk açılış → ilk ekran | ≤ 2 sn | ✅ **1013–1539 ms** (5 ölçüm: 1539, 1056, 1093, 1013, 1031; ilk tur ölçümlerde 1568 ve 2096 ms de görüldü) | `adb shell am force-stop …; adb shell am start -W …` → `TotalTime` |
+| 365 fotoğrafla soğuk açılış → ilk ekran | ≤ 2 sn | ✅ **1045–1195 ms** (son APK, 5 ölçüm: 1061, 1047, 1195, 1045, 1134). Açılış iyileştirmesinden önceki APK: 1013–2096 ms | `adb shell am force-stop …; adb shell am start -W …` → `TotalTime` |
 | Ağ isteği yok | Release manifestte `INTERNET` yok | ✅ Yok. İzinler: `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `VIBRATE` (+ eklentinin iç `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`) | `build/app/intermediates/merged_manifests/release/processReleaseManifest/AndroidManifest.xml` |
 | Yalnızca onaylı paketler | ISKELET §3 listesi | ✅ `pubspec.yaml`: image_picker, path_provider, path, sqflite, shared_preferences, flutter_local_notifications, timezone, flutter_timezone, intl, flutter_localizations; dev: flutter_lints, sqflite_common_ffi | `pubspec.yaml` |
 
-Soğuk açılış notu: ölçülen sürümde `main()`, saat dilimi veritabanını ve bildirim eklentisini `runApp`'ten **önce** yüklüyordu. Bu adım ilk kareden sonraya taşındı (bildirim çağrıları hazır olmasını bekler); yani mevcut kod en az ölçülen kadar hızlı olmalı. Yeni APK cihazda yeniden ölçülemedi, çünkü MIUI USB kurulumunu iptal etti. Tekrar ölçmek için:
+Soğuk açılış notu: saat dilimi veritabanı ve bildirim eklentisi artık ilk kareden sonra yükleniyor (bildirim çağrıları hazır olmasını bekler). Yeniden ölçmek için:
 
 ```bash
 flutter build apk --profile && adb install -r build/app/outputs/flutter-apk/app-profile.apk

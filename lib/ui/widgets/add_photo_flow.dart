@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/date_key.dart';
 import '../../core/strings.dart';
+import '../../core/theme.dart';
 import '../../data/entry.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
@@ -17,7 +18,9 @@ Future<bool> confirmAction(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      content: Text(question, style: const TextStyle(fontSize: 18)),
+      title: Text(question, style: AppText.headline),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

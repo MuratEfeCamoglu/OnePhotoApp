@@ -22,8 +22,8 @@ void main() {
     h = await TestHarness.create();
     await pumpTimeline(tester, h);
     expect(find.text('OnePhoto'), findsOneWidget);
-    expect(find.byIcon(Icons.photo_camera_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+    expect(find.byKey(const ValueKey('camera-button')), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
   });
 
   testWidgets('weekday header starts on Monday (F1d)', (tester) async {
@@ -89,7 +89,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('day-2026-10-02')),
-        matching: find.byIcon(Icons.broken_image_outlined),
+        matching: find.byIcon(Icons.broken_image),
       ),
       findsOneWidget,
     );
@@ -105,7 +105,7 @@ void main() {
       h,
       settingsBuilder: (_) => SettingsScreen(reminders: h.reminders),
     );
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
     expect(find.text(Strings.storageInfo), findsOneWidget);
   });
@@ -123,7 +123,7 @@ void main() {
     await pumpTimeline(tester, h);
     expect(thumbIn('2026-10-09'), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.tap(find.byKey(const ValueKey('camera-button')));
     await tester.pumpAndSettle();
 
     expect(h.picker.cameraCalls, 1);
@@ -131,10 +131,22 @@ void main() {
     expect(find.text(Strings.emptyTimeline), findsNothing);
   });
 
+  testWidgets('tapping the empty card opens the camera for today', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    h.picker.cameraResult = writeSourcePhoto(h.root);
+    await pumpTimeline(tester, h);
+    await tester.tap(find.text(Strings.emptyTimeline));
+    await tester.pumpAndSettle();
+    expect(h.picker.cameraCalls, 1);
+    expect(h.repo.rows.keys, ['2026-10-09']);
+  });
+
   testWidgets('cancelling the camera changes nothing (F2c)', (tester) async {
     h = await TestHarness.create();
     await pumpTimeline(tester, h);
-    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.tap(find.byKey(const ValueKey('camera-button')));
     await tester.pumpAndSettle();
     expect(h.repo.rows, isEmpty);
     expect(find.text(Strings.emptyTimeline), findsOneWidget);
@@ -145,7 +157,7 @@ void main() {
   ) async {
     h = await TestHarness.create(photoDays: ['2026-10-09']);
     await pumpTimeline(tester, h);
-    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.tap(find.byKey(const ValueKey('camera-button')));
     await tester.pumpAndSettle();
     expect(find.text(Strings.replaceQuestion), findsOneWidget);
   });

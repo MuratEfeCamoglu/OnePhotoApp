@@ -80,27 +80,25 @@ class _TimelineScreenState extends State<TimelineScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          Strings.appTitle,
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-        ),
+        titleSpacing: AppDimens.gutter,
+        title: const Text(Strings.appTitle, style: AppText.appTitle),
         actions: [
           ListenableBuilder(
             listenable: _controller,
             builder: (context, _) => IconButton(
               key: const ValueKey('camera-button'),
               tooltip: Strings.cameraTooltip,
-              icon: const Icon(Icons.photo_camera_outlined),
+              icon: const Icon(Icons.photo_camera),
               onPressed: _controller.isLoading ? null : _onCameraPressed,
             ),
           ),
           IconButton(
             key: const ValueKey('settings-button'),
             tooltip: Strings.settingsTooltip,
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.settings),
             onPressed: _openSettings,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
         ],
         bottom: const _WeekdayHeader(),
       ),
@@ -115,10 +113,16 @@ class _TimelineScreenState extends State<TimelineScreen> {
           final offset = _controller.isEmpty ? 1 : 0;
           // Lazily built: only months near the viewport exist (ISKELET §5).
           return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: EdgeInsets.only(
+              bottom: 24 + MediaQuery.paddingOf(context).bottom,
+            ),
             itemCount: months.length + offset,
             itemBuilder: (context, index) {
-              if (index < offset) return const _EmptyState();
+              if (index < offset) {
+                return _EmptyCard(
+                  onTap: _controller.isLoading ? null : _onCameraPressed,
+                );
+              }
               return MonthGrid(
                 month: months[index - offset],
                 todayKey: today,
@@ -140,58 +144,117 @@ class _WeekdayHeader extends StatelessWidget implements PreferredSizeWidget {
   const _WeekdayHeader();
 
   @override
-  Size get preferredSize => const Size.fromHeight(28);
+  Size get preferredSize => const Size.fromHeight(29);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      height: 29,
       padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.outline)),
+      ),
       child: Row(
         children: [
-          for (final name in Strings.weekdaysShort)
+          for (final (i, name) in Strings.weekdaysShort.indexed) ...[
+            if (i > 0) const SizedBox(width: AppDimens.cellGap),
             Expanded(
               child: Text(
                 name,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.dayMuted,
-                ),
+                style: AppText.weekday,
               ),
             ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+/// Dashed "add your first photo" card shown while there are no entries.
+class _EmptyCard extends StatelessWidget {
+  const _EmptyCard({required this.onTap});
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(AppDimens.gutter, 24, AppDimens.gutter, 0),
-      child: Column(
-        children: [
-          Icon(
-            Icons.add_photo_alternate_outlined,
-            size: 40,
-            color: AppColors.dayMuted,
-          ),
-          SizedBox(height: 8),
-          Text(
-            Strings.emptyTimeline,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.onSurfaceVariant,
+    final radius = BorderRadius.circular(AppDimens.cardRadius);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppDimens.gutter,
+        AppDimens.gutter,
+        AppDimens.gutter,
+        0,
+      ),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: radius,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: CustomPaint(
+            painter: const _DashedBorderPainter(),
+            child: const SizedBox(
+              height: 120,
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.onAccent,
+                    child: Icon(Icons.photo_camera, size: 24),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    Strings.emptyTimeline,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
+}
+
+/// 1.5px dashed rounded border; Flutter has no dashed BoxBorder.
+class _DashedBorderPainter extends CustomPainter {
+  const _DashedBorderPainter();
+
+  static const _dash = 6.0;
+  static const _gap = 4.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = (Offset.zero & size).deflate(0.75);
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          rect,
+          const Radius.circular(AppDimens.cardRadius),
+        ),
+      );
+    final paint = Paint()
+      ..color = AppColors.handle
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final metric in path.computeMetrics()) {
+      for (var d = 0.0; d < metric.length; d += _dash + _gap) {
+        canvas.drawPath(metric.extractPath(d, d + _dash), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) => false;
 }

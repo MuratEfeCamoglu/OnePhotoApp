@@ -25,7 +25,7 @@ void main() {
   }
 
   bool switchValue(WidgetTester tester) => tester
-      .widget<SwitchListTile>(find.byKey(const ValueKey('reminder-switch')))
+      .widget<Switch>(find.byKey(const ValueKey('reminder-switch')))
       .value;
 
   testWidgets('shows the storage notice (F6g)', (tester) async {

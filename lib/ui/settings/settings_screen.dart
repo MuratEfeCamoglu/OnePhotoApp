@@ -97,37 +97,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text(Strings.settingsTitle)),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          SwitchListTile(
-            key: const ValueKey('reminder-switch'),
-            secondary: const Icon(Icons.notifications_outlined),
-            title: const Text(Strings.reminderTitle),
-            value: _enabled,
-            onChanged: _busy ? null : _toggle,
+          _SettingsRow(
+            onTap: _busy ? null : () => _toggle(!_enabled),
+            label: Strings.reminderTitle,
+            trailing: Switch(
+              key: const ValueKey('reminder-switch'),
+              value: _enabled,
+              onChanged: _busy ? null : _toggle,
+            ),
           ),
-          ListTile(
+          const Divider(indent: AppDimens.gutter, endIndent: AppDimens.gutter),
+          _SettingsRow(
             key: const ValueKey('reminder-time'),
-            leading: const Icon(Icons.schedule),
-            title: Text(Strings.reminderTime(_minutes)),
-            enabled: !_busy,
-            onTap: _pickTime,
-          ),
-          const Divider(),
-          const ListTile(
-            leading: Icon(Icons.info_outline, color: AppColors.dayMuted),
-            title: Text(
-              Strings.storageInfo,
-              style: TextStyle(color: AppColors.onSurfaceVariant),
+            onTap: _busy ? null : _pickTime,
+            label: Strings.reminderTime(_minutes),
+            trailing: const Icon(
+              Icons.chevron_right,
+              color: AppColors.dayMuted,
             ),
           ),
-          if (!kReleaseMode && widget.onGenerateDemoData != null)
-            ListTile(
+          const _InfoCard(),
+          if (!kReleaseMode && widget.onGenerateDemoData != null) ...[
+            const SizedBox(height: 8),
+            _SettingsRow(
               key: const ValueKey('demo-data'),
-              leading: const Icon(Icons.auto_awesome_motion_outlined),
-              title: const Text(Strings.demoDataButton),
-              enabled: !_busy,
-              onTap: _generateDemoData,
+              onTap: _busy ? null : _generateDemoData,
+              label: Strings.demoDataButton,
+              trailing: const Icon(
+                Icons.auto_awesome_motion,
+                color: AppColors.dayMuted,
+              ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// 64px tall row with a label and a trailing control (mockup `.row`).
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    super.key,
+    required this.label,
+    required this.trailing,
+    this.onTap,
+  });
+
+  final String label;
+  final Widget trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 64),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
+          child: Row(
+            children: [
+              Expanded(child: Text(label, style: AppText.body)),
+              const SizedBox(width: 16),
+              trailing,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Grey card with the local-only storage notice (ISKELET F6g).
+class _InfoCard extends StatelessWidget {
+  const _InfoCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppDimens.gutter,
+        AppDimens.gutter,
+        AppDimens.gutter,
+        0,
+      ),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppDimens.cardRadius),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(top: 1),
+            child: Icon(
+              Icons.info,
+              size: 20,
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              Strings.storageInfo,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.45,
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );

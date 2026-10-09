@@ -126,3 +126,18 @@ Emülatör (AVD "Efe") açıldı ama ölçüm başlamadan kapandı; bu sırada U
 - [ ] Doğrulanmadı: galeriden seçme (kişisel galeriye dokunmamak için), iki parmakla yakınlaştırma, izin reddi, bildirimin gelmesi ve dokunma, cihaz yeniden başlatma, uçak modu. İyileştirilmiş APK kurulamadı (MIUI USB kurulumunu iptal etti, "INSTALL_FAILED_USER_RESTRICTED").
 
 Doğrulama: format ✅, analyze ✅, 138/138 test ✅.
+
+## Görsel uyum — onephoto-mockup.html
+Mockup baştan sona okunup ekran ekran karşılaştırıldı; farklar düzeltildi:
+- Tema: tüm renk/yarıçap/yazı belirteçleri `core/theme.dart` (`AppColors`, `AppDimens`, `AppText`); M3 tonlaması kapatıldı (beyaz diyalog/alt sayfa), %32 karartma, buton yarıçapı 22, SnackBar yarıçapı 8 ve `#FAFAFA` yazı, anahtar (switch) renkleri.
+- Zaman çizelgesi: dolgulu kamera/ayar ikonları, başlık -0.02em, hafta günü satırı 11 semibold `#52525B` + 6px aralık + alt ayraç, ay başlığı 24/12 boşluk.
+- Hücre: bugün çerçevesi hücrenin 1px dışında (outline-offset) ve kalın numara; gölge alttan %70'e; gün no. gölgesi %50; dolgulu kırık-resim ikonu.
+- Boş durum: kesik çizgili gri kart + turuncu daire içinde kamera + 16 semibold metin; dokununca bugünün kamerası açılır.
+- Alt sayfa: 28 yarıçap, 32×4 tutamaç, ortalanmış başlık, 56px satırlar, ortalanmış "Vazgeç" metin butonu.
+- Diyalog: beyaz, 28 yarıçap, 24 iç boşluk, başlık 20 semibold.
+- Gün detayı: beyaz zemin, 17 semibold başlık, alt kısımda gri "Değiştir" ve açık kırmızı "Sil" butonları (48px, 20px ikon).
+- Ayarlar: ikonsuz 64px satırlar, ayraç, saat satırında `›`, gri bilgi kartı (14px, 1.45 satır yüksekliği).
+İyileştirmeler: küçük resimler 220 ms'de yumuşak belirir; hücreden detaya Hero geçişi.
+Cihazda (Poco X3, yeni profile APK) ekran görüntüleriyle doğrulandı: zaman çizelgesi, alt sayfa, detay, değiştirme diyaloğu, ayarlar. Boş durum kartı cihazda görülmedi (veri dolu); widget testiyle kapsandı.
+365 kayıtla soğuk açılış (yeni APK): 1061/1047/1195/1045/1134 ms.
+Doğrulama: format ✅, analyze ✅, 141/141 test ✅.

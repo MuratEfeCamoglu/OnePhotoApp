@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/date_key.dart';
 import '../../core/strings.dart';
+import '../../core/theme.dart';
 import '../../state/timeline_controller.dart';
+import '../timeline/day_cell.dart';
 import '../widgets/add_photo_flow.dart';
 import '../widgets/error_snackbar.dart';
 
@@ -39,69 +41,108 @@ class DayDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text(formatLongDate(dateKey)),
-      ),
+      appBar: AppBar(title: Text(formatLongDate(dateKey))),
       body: ListenableBuilder(
         listenable: controller,
         builder: (context, _) {
           final entry = controller.entryFor(dateKey);
           if (entry == null) return const SizedBox.expand();
           final file = controller.fileFor(entry);
-          const broken = Center(
-            child: Icon(
-              Icons.broken_image_outlined,
-              size: 48,
-              color: Colors.white54,
+          const broken = ColoredBox(
+            color: AppColors.surface,
+            child: Center(
+              child: Icon(
+                Icons.broken_image,
+                size: 48,
+                color: AppColors.dayMuted,
+              ),
             ),
           );
-          if (!file.existsSync()) return broken;
+          if (!file.existsSync()) return const SizedBox.expand(child: broken);
           return InteractiveViewer(
             minScale: 1,
             maxScale: 4,
             child: SizedBox.expand(
-              // Full-size decode only here; the grid uses thumbnails.
-              child: Image.file(
-                file,
-                key: ValueKey(entry.fileName),
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stack) => broken,
+              child: Hero(
+                tag: photoHeroTag(dateKey),
+                // Full-size decode only here; the grid uses thumbnails.
+                child: Image.file(
+                  file,
+                  key: ValueKey(entry.fileName),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stack) => broken,
+                ),
               ),
             ),
           );
         },
       ),
       bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.only(bottom: 8),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.fromLTRB(
+            AppDimens.gutter,
+            AppDimens.gutter,
+            AppDimens.gutter,
+            0,
+          ),
           child: Row(
             children: [
               Expanded(
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(foregroundColor: Colors.white),
+                child: _ActionButton(
+                  icon: Icons.autorenew,
+                  label: Strings.replace,
+                  background: AppColors.surface,
+                  foreground: AppColors.onSurface,
                   onPressed: () =>
                       chooseSourceAndAdd(context, controller, dateKey),
-                  icon: const Icon(Icons.swap_horiz),
-                  label: const Text(Strings.replace),
                 ),
               ),
+              const SizedBox(width: 12),
               Expanded(
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFFFB4AB),
-                  ),
+                child: _ActionButton(
+                  icon: Icons.delete,
+                  label: Strings.delete,
+                  background: AppColors.errorContainer,
+                  foreground: AppColors.error,
                   onPressed: () => _delete(context),
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text(Strings.delete),
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color background;
+  final Color foreground;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      style: FilledButton.styleFrom(
+        backgroundColor: background,
+        foregroundColor: foreground,
+        minimumSize: const Size(0, 48),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      label: Text(label),
     );
   }
 }

@@ -58,7 +58,12 @@ void main() {
     await tester.tap(find.text(Strings.delete));
     await tester.pumpAndSettle();
     expect(find.text(Strings.deleteQuestion), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, Strings.delete));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text(Strings.delete),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(h.controller.entryFor('2026-10-09'), isNull);
@@ -97,7 +102,12 @@ void main() {
     await tester.tap(find.text(Strings.pickFromGallery));
     await tester.pumpAndSettle();
     expect(find.text(Strings.replaceQuestion), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, Strings.replace));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text(Strings.replace),
+      ),
+    );
     await tester.pumpAndSettle();
 
     final entry = h.repo.rows['2026-10-05']!;
@@ -114,7 +124,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(DayDetailScreen),
-        matching: find.byIcon(Icons.broken_image_outlined),
+        matching: find.byIcon(Icons.broken_image),
       ),
       findsOneWidget,
     );

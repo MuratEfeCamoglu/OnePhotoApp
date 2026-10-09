@@ -13,8 +13,6 @@ Future<PhotoSource?> showPhotoSourceSheet(
 }) {
   return showModalBottomSheet<PhotoSource>(
     context: context,
-    showDragHandle: true,
-    backgroundColor: AppColors.background,
     builder: (_) => PhotoSourceSheet(title: title),
   );
 }
@@ -31,34 +29,94 @@ class PhotoSourceSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final navigator = Navigator.of(context);
     return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12, bottom: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 32,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.handle,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.onSurface,
+                ),
+              ),
+            ),
+            _SourceTile(
+              icon: Icons.photo_camera,
+              label: Strings.takePhoto,
+              onTap: () => navigator.pop(PhotoSource.camera),
+            ),
+            _SourceTile(
+              icon: Icons.photo_library,
+              label: Strings.pickFromGallery,
+              onTap: () => navigator.pop(PhotoSource.gallery),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onPressed: () => navigator.pop(),
+                child: const Text(Strings.cancel),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceTile extends StatelessWidget {
+  const _SourceTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Icon(icon, size: 24, color: AppColors.onSurfaceVariant),
+              const SizedBox(width: 16),
+              Text(label, style: AppText.body),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.photo_camera_outlined),
-            title: const Text(Strings.takePhoto),
-            onTap: () => navigator.pop(PhotoSource.camera),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library_outlined),
-            title: const Text(Strings.pickFromGallery),
-            onTap: () => navigator.pop(PhotoSource.gallery),
-          ),
-          ListTile(
-            leading: const Icon(Icons.close),
-            title: const Text(Strings.cancel),
-            onTap: () => navigator.pop(),
-          ),
-          const SizedBox(height: 8),
-        ],
+        ),
       ),
     );
   }
