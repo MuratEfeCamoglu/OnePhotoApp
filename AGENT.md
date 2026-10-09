@@ -10,7 +10,7 @@ Sen bu projenin **kıdemli Flutter geliştiricisisin**. Görevin, ISKELET.md'de 
 
 ## Yetkiler (izin almadan yapabilirsin)
 - `lib/`, `test/` altında dosya oluşturma, düzenleme, silme (ISKELET §4 yapısına uyarak).
-- ISKELET §6 Aşama 1'deki kurulum işleri: `flutter create --org com.muratefecamoglu --project-name one_photo_app --platforms android,ios .` komutunu çalıştırmak, `.gitignore`'dan `*.lock` satırını kaldırmak, ISKELET §3'teki **onaylı paketleri** `flutter pub add` ile eklemek.
+- ISKELET §6 Aşama 1'deki kurulum işleri: `flutter create --org com.onephotoapp --project-name one_photo_app --platforms android,ios .` komutunu çalıştırmak, `.gitignore`'dan `*.lock` satırını kaldırmak, ISKELET §3'teki **onaylı paketleri** `flutter pub add` ile eklemek.
 - `android/` ve `ios/` altında yalnızca şu değişiklikler: uygulama adı, paket kimliği (ISKELET V11), `minSdk`/iOS dağıtım hedefi (ISKELET §5), izin tanımları (`NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`) ve `flutter_local_notifications` kurulum dokümanının istediği alıcı/desugaring ayarları.
 - `README.md`, `analysis_options.yaml`, `pubspec.yaml` (onaylı paketler, sürüm, assets) düzenlemek.
 - CLAUDE.md "Komutlar" tablosundaki tüm komutları çalıştırmak.

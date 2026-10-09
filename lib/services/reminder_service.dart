@@ -111,7 +111,9 @@ class LocalNotificationScheduler implements ReminderScheduler {
     }
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // Status-bar icons must be monochrome; the launcher icon would
+        // show as a white square.
+        android: AndroidInitializationSettings('@drawable/ic_stat_onephoto'),
         iOS: DarwinInitializationSettings(
           requestAlertPermission: false,
           requestBadgePermission: false,

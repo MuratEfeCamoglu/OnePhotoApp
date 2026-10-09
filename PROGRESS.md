@@ -15,7 +15,7 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 
 ## Aşama 1 — Kurulum
 Kriterler:
-- `flutter create --org com.muratefecamoglu --project-name one_photo_app --platforms android,ios .`
+- `flutter create --org com.onephotoapp --project-name one_photo_app --platforms android,ios .`
 - `.gitignore` içinden `*.lock` kaldırıldı → `pubspec.lock` izleniyor.
 - Onaylı paketler eklendi (image_picker, path_provider, path, sqflite, shared_preferences, flutter_local_notifications, timezone, flutter_timezone, intl, flutter_localizations; dev: flutter_lints, sqflite_common_ffi). `cupertino_icons` kaldırıldı (V15).
 - `analysis_options.yaml` = `flutter_lints`.
@@ -108,8 +108,8 @@ Doğrulama: format ✅, analyze ✅, 131/131 test ✅.
 - `flutter build apk --release` ✅; birleştirilmiş release manifestinde `INTERNET` yok ✅.
 - README: §1 ölçütleri ölçüm yöntemi ve sonuçlarıyla yazıldı.
 
-### Cihazda yapılan elle kontroller (Xiaomi Poco X3 NFC, Android 12, profile APK)
-Emülatör (AVD "Efe") açıldı ama ölçüm başlamadan kapandı; bu sırada USB ile fiziksel cihaz bağlandı ve kontroller onunla yapıldı. Cihaz bağlantısı ölçümün ortasında kesildi.
+### Cihazda yapılan elle kontroller (orta seviye Android 12 telefon, profile APK)
+Yerel emülatör açıldı ama ölçüm başlamadan kapandı; bu sırada USB ile fiziksel cihaz bağlandı ve kontroller onunla yapıldı. Cihaz bağlantısı ölçümün ortasında kesildi.
 - [x] Hiç kayıt yokken boş durum metni, Türkçe ay başlıkları, Pazartesi başlangıç, bugün çerçevesi, gelecek günler soluk (F1).
 - [x] Kamera ikonu → sistem kamerası doğrudan açılır (F2a).
 - [x] Kamerayı iptal et: hiçbir şey değişmez (F2c).
@@ -138,7 +138,7 @@ Mockup baştan sona okunup ekran ekran karşılaştırıldı; farklar düzeltild
 - Gün detayı: beyaz zemin, 17 semibold başlık, alt kısımda gri "Değiştir" ve açık kırmızı "Sil" butonları (48px, 20px ikon).
 - Ayarlar: ikonsuz 64px satırlar, ayraç, saat satırında `›`, gri bilgi kartı (14px, 1.45 satır yüksekliği).
 İyileştirmeler: küçük resimler 220 ms'de yumuşak belirir; hücreden detaya Hero geçişi.
-Cihazda (Poco X3, yeni profile APK) ekran görüntüleriyle doğrulandı: zaman çizelgesi, alt sayfa, detay, değiştirme diyaloğu, ayarlar. Boş durum kartı cihazda görülmedi (veri dolu); widget testiyle kapsandı.
+Cihazda (test telefonu, yeni profile APK) ekran görüntüleriyle doğrulandı: zaman çizelgesi, alt sayfa, detay, değiştirme diyaloğu, ayarlar. Boş durum kartı cihazda görülmedi (veri dolu); widget testiyle kapsandı.
 365 kayıtla soğuk açılış (yeni APK): 1061/1047/1195/1045/1134 ms.
 Doğrulama: format ✅, analyze ✅, 141/141 test ✅.
 
@@ -165,7 +165,7 @@ Doğrulama: format ✅, analyze ✅, 173/173 test ✅, `flutter build apk --rele
 - **Not:** `Entry.note`, şema v2 (`note TEXT`, eklemeli geçiş), `PhotoService.saveNote`, `TimelineController.updateNote`; fotoğraf değişince not korunur; hücrede not rozeti; tam ekran detayda not kartı.
 - **Türkçe büyük harf hatası:** Ayarlar bölüm başlıkları `toUpperCase()` ile "DIL" oluyordu; büyük harfe çevirme kaldırıldı.
 - **Telefondaki siyah kareler:** test sırasında karanlıkta çekilen 9 Ekim fotoğrafı ve "demo veri" butonunun ürettiği 362 birebir kopyası (md5 `2d4515…`) telefondan silindi. Kullanıcının 1 ve 2 Ekim fotoğrafları korundu. Silmeden önce veritabanı yedeği alındı (scratchpad `one_photo_backup.db`). Gerçek cihazda v1→v2 şema geçişi doğrulandı.
-- Cihazda doğrulandı (Poco X3): alt çubuk, koyu tema, İngilizce, önizleme kartı, not yazma + geri tuşuyla kaydetme, not rozeti.
+- Cihazda doğrulandı (test telefonu): alt çubuk, koyu tema, İngilizce, önizleme kartı, not yazma + geri tuşuyla kaydetme, not rozeti.
 Doğrulama: format ✅, analyze ✅, 196/196 test ✅.
 
 ## Kategoriler (F12)
@@ -190,3 +190,17 @@ Doğrulama: format ✅, analyze ✅, 236/236 test ✅.
 ## Düzen: ayarlar sağ üstte, alt çubuk Ana sayfa · Kamera · Galeri
 - Alt çubuk: Ana sayfa · Kamera (tam ortada) · Galeri. Ayarlar alt çubuktan çıktı; ana sayfa ve galeri başlığının sağ üstünde yuvarlak düğme (`SettingsButton`).
 Doğrulama: format ✅, analyze ✅, 238/238 test ✅.
+
+## Takılma (kasma) düzeltmesi ve Play Store hazırlığı
+**Ölçüm yöntemi:** profile APK'ya geçici kare süresi kaydı (`addTimingsCallback`, commit edilmedi), 365 günlük demo veri, ana sayfa ve galeride `adb` ile 28 hızlı fırlatma.
+
+| | Önce | Sonra |
+|---|---|---|
+| > 16,7 ms kare oranı | %36,9 | %6–9 |
+| Raster p90 / en kötü | 33,6 / 135 ms | 15 / 45–95 ms |
+| Build p99 / en kötü | 24,5 / 67 ms | 13–14 / 33–44 ms |
+
+Nedenler ve düzeltmeler: alt çubuktaki `BackdropFilter` her karede kaydırılan ızgarayı bulanıklaştırıyordu (kaldırıldı, neredeyse opak dolgu); her gün numarasında bulanık yazı gölgesi (keskin 1 px gölge); kategori rozetlerinde gölge (kaldırıldı); her ay kaydırılınca yeniden oynayan belirme animasyonları (yalnızca ilk ekran, bitince katman bırakmaz); hücre başına senkron `existsSync` (controller'da önbellek); hücre başına yeni `DateFormat` (önbellek); ay başına `GridView(shrinkWrap)` (satır/sütun yerleşimi); gelecek günler için tam etkileşimli hücre (sade metin).
+
+**Play Store:** paket kimliği `com.onephotoapp.android` / iOS `com.onephotoapp.ios` (V24); `key.properties` ile yükleme anahtarı imzası; tek renkli bildirim simgesi (`ic_stat_onephoto`); bulut yedeği kapalı, cihazdan cihaza aktarım açık (V25); pubspec açıklaması; belgelerdeki kişisel bilgiler (eski kimlik, cihaz modeli, emülatör adı) temizlendi. `docs/play-store/`: 512 simge, 1024×500 öne çıkan grafik (TR/EN), 6+6 adet 1080×2160 ekran görüntüsü (örnek görsellerle), mağaza metinleri, veri güvenliği yanıtları; `docs/privacy-policy.md` (TR/EN, iletişim e-postası yer tutucu).
+Doğrulama: format ✅, analyze ✅, 243/243 test ✅, `flutter build appbundle --release` ✅, release manifestinde `INTERNET` yok ✅.

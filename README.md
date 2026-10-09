@@ -26,6 +26,7 @@
 - [Mimari](#mimari)
 - [Testler ve kalite](#testler-ve-kalite)
 - [Başarı ölçütleri](#başarı-ölçütleri)
+- [Play Store](#play-store)
 - [Belgeler](#belgeler)
 
 ## Ekranlar
@@ -132,11 +133,11 @@ Durum yönetimi `ChangeNotifier` + `ListenableBuilder` ile yapılır; ek paket y
 
 - **238 otomatik test**: birim (gün anahtarı, takvim, model, servisler), veritabanı (`sqflite_common_ffi`, şema geçişleri dahil) ve widget testleri (tüm ekranlar, TR/EN, açık/koyu tema).
 - `flutter analyze` sıfır uyarı, `dart format` temiz.
-- Gerçek cihazda (Xiaomi Poco X3, Android 12) kamera akışı, önizleme, düzenleme, galeri, tema ve dil elle doğrulandı.
+- Gerçek cihazda (orta seviye Android 12 telefon) kamera akışı, önizleme, düzenleme, galeri, tema ve dil elle doğrulandı.
 
 ## Başarı ölçütleri
 
-Ölçüm: 2026-10-09, Xiaomi Poco X3 NFC (Android 12), profile APK.
+Ölçüm: 2026-10-09, orta seviye Android 12 telefon, profile APK.
 
 | Ölçüt | Hedef | Sonuç |
 |---|---|---|
@@ -151,11 +152,19 @@ Durum yönetimi `ChangeNotifier` + `ListenableBuilder` ile yapılır; ek paket y
 ```bash
 flutter build apk --profile && adb install -r build/app/outputs/flutter-apk/app-profile.apk
 # Ayarlar > "365 günlük demo veri üret" (önce bir fotoğraf ekle)
-adb shell am force-stop com.muratefecamoglu.one_photo_app
-adb shell am start -W -n com.muratefecamoglu.one_photo_app/.MainActivity   # TotalTime (ms)
+adb shell am force-stop com.onephotoapp.android
+adb shell am start -W -n com.onephotoapp.android/.MainActivity   # TotalTime (ms)
 ```
 
 </details>
+
+## Play Store
+
+Paket kimliği `com.onephotoapp.android`. Yükleme anahtarı, app bundle derleme, mağaza metinleri (TR/EN), veri güvenliği yanıtları ve 1080×2160 ekran görüntüleri: [docs/play-store](docs/play-store/README.md) · Gizlilik politikası: [docs/privacy-policy.md](docs/privacy-policy.md)
+
+```bash
+flutter build appbundle --release   # android/key.properties ile imzalanır
+```
 
 ## Belgeler
 
