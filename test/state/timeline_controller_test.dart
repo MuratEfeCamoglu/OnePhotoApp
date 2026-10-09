@@ -73,6 +73,20 @@ void main() {
     expect(h.repo.rows, isEmpty);
   });
 
+  test('generateDemoData fills a year and reloads', () async {
+    h = await TestHarness.create(photoDays: ['2026-10-01']);
+    await h.controller.startup();
+    expect(await h.controller.generateDemoData(), 364);
+    expect(h.controller.entryCount, 365);
+  });
+
+  test('generateDemoData without photos returns null', () async {
+    h = await TestHarness.create();
+    await h.controller.startup();
+    expect(await h.controller.generateDemoData(), isNull);
+    expect(h.controller.isEmpty, isTrue);
+  });
+
   test('startup errors are kept for the UI and still load data', () async {
     h = await TestHarness.create(photoDays: ['2026-10-01']);
     h.picker.lostResult = h.storage.resolve('missing.jpg');

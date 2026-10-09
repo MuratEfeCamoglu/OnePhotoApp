@@ -10,8 +10,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 | 4. Zaman çizelgesi UI | ✅ | 6476121 |
 | 5. Ekleme akışları | ✅ | 8ee82f9 |
 | 6. Gün detayı | ✅ | e1825df |
-| 7. Hatırlatma | ✅ | (bu commit) |
-| 8. Cila ve teslim | ⏳ | |
+| 7. Hatırlatma | ✅ | cd94bcc |
+| 8. Cila ve teslim | ✅ | (bu commit) |
 
 ## Aşama 1 — Kurulum
 Kriterler:
@@ -99,3 +99,30 @@ Kriterler → kanıt:
 - F7g saat seçici Türkçe ("Tamam/İptal"), 24 saat → `settings_screen_test`. Test, klavye modunda "07"nin 19 okunduğu bir Flutter tutarsızlığını yakaladı; seçici `alwaysUse24HourFormat: true` ile sarıldı.
 Hata durumu: zamanlama hatası "Hatırlatma ayarlanamadı, tekrar dene." SnackBar'ı.
 Doğrulama: format ✅, analyze ✅, 131/131 test ✅.
+
+## Aşama 8 — Cila ve teslim
+- Uygulama ikonu: varsayılan Flutter ikonu (ISKELET izin veriyor).
+- Demo veri: Ayarlar'da `!kReleaseMode` iken "365 günlük demo veri üret" → `PhotoService.fillDemoDays` en yeni mevcut fotoğrafı kopyalayarak son 365 günün boşlarını doldurur. Testler: `photo_service_test` (364 gün doldurur, mevcut kaydı korur, fotoğraf yoksa null), `timeline_controller_test`, `settings_screen_test`.
+- 365 kayıtta tembel oluşturma: `timeline_screen_test` (< 4 MonthGrid oluşturulur).
+- Açılış iyileştirmesi: saat dilimi veritabanı + bildirim eklentisi başlatması `runApp` sonrasına alındı; zamanlayıcı çağrıları hazır olmayı bekler.
+- `flutter build apk --release` ✅; birleştirilmiş release manifestinde `INTERNET` yok ✅.
+- README: §1 ölçütleri ölçüm yöntemi ve sonuçlarıyla yazıldı.
+
+### Cihazda yapılan elle kontroller (Xiaomi Poco X3 NFC, Android 12, profile APK)
+Emülatör (AVD "Efe") açıldı ama ölçüm başlamadan kapandı; bu sırada USB ile fiziksel cihaz bağlandı ve kontroller onunla yapıldı. Cihaz bağlantısı ölçümün ortasında kesildi.
+- [x] Hiç kayıt yokken boş durum metni, Türkçe ay başlıkları, Pazartesi başlangıç, bugün çerçevesi, gelecek günler soluk (F1).
+- [x] Kamera ikonu → sistem kamerası doğrudan açılır (F2a).
+- [x] Kamerayı iptal et: hiçbir şey değişmez (F2c).
+- [x] Kamera → deklanşör → onay: bugünün hücresinde ≤1,5 sn içinde küçük resim, toplam 3 dokunuş (F2b, §1).
+- [x] Ayarlar ikonu Ayarlar'ı açar; bilgi metni, hatırlatma anahtarı (kapalı), "Saat: 20:00" görünür (F1g, F6g, F7a).
+- [x] Demo veri 365 günü doldurur; ızgara küçük resimlerle görünür.
+- [x] 365 kayıtla soğuk açılış `TotalTime`: 1539/1056/1093/1013/1031 ms (cihaz yeniden bağlandıktan sonra, iyileştirme öncesi APK; ilk turda 2096/1568 ms).
+- [x] Uygulamayı tamamen kapat-aç: tüm kayıtlar yerinde (F6c).
+- [x] Gelecek güne dokunmak hiçbir şey açmaz (F1e).
+- [x] Fotoğraflı hücre → detay "8 Ekim 2026, Perşembe", Değiştir/Sil (F5a); Sil → onay → kayıt silinir, ana ekrana dönülür, hücre boş (F5c).
+- [x] Boş güne dokun → "8 Ekim 2026" başlıklı Fotoğraf çek / Galeriden seç / Vazgeç sayfası (F3a).
+- [x] Dolu bugünde kamera ikonu → "Bu günün fotoğrafı değiştirilsin mi?" onayı (F4b).
+- [x] Saat seçici Türkçe ("Saat seçin", İptal/Tamam) ve 24 saat (F7g).
+- [ ] Doğrulanmadı: galeriden seçme (kişisel galeriye dokunmamak için), iki parmakla yakınlaştırma, izin reddi, bildirimin gelmesi ve dokunma, cihaz yeniden başlatma, uçak modu. İyileştirilmiş APK kurulamadı (MIUI USB kurulumunu iptal etti, "INSTALL_FAILED_USER_RESTRICTED").
+
+Doğrulama: format ✅, analyze ✅, 138/138 test ✅.

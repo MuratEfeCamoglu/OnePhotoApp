@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -74,10 +75,19 @@ class LocalNotificationScheduler implements ReminderScheduler {
   static const _channelId = 'daily_reminder';
 
   final FlutterLocalNotificationsPlugin _plugin;
+  final _ready = Completer<void>();
 
   /// Loads time zones and the plugin; [onTap] runs when a notification is
-  /// tapped while the app is alive.
+  /// tapped while the app is alive. Other calls wait until this finishes.
   Future<void> initialize({VoidCallback? onTap}) async {
+    try {
+      await _initialize(onTap);
+    } finally {
+      _ready.complete();
+    }
+  }
+
+  Future<void> _initialize(VoidCallback? onTap) async {
     tz_data.initializeTimeZones();
     try {
       final zone = await FlutterTimezone.getLocalTimezone();
@@ -102,6 +112,7 @@ class LocalNotificationScheduler implements ReminderScheduler {
 
   @override
   Future<bool> requestPermission() async {
+    await _ready.future;
     if (Platform.isAndroid) {
       final android = _plugin
           .resolvePlatformSpecificImplementation<
@@ -124,6 +135,7 @@ class LocalNotificationScheduler implements ReminderScheduler {
   @override
   Future<void> scheduleDaily(int minutes) async {
     await cancel();
+    await _ready.future;
     final now = tz.TZDateTime.now(tz.local);
     var at = tz.TZDateTime(
       tz.local,
@@ -154,5 +166,8 @@ class LocalNotificationScheduler implements ReminderScheduler {
   }
 
   @override
-  Future<void> cancel() => _plugin.cancel(id: _notificationId);
+  Future<void> cancel() async {
+    await _ready.future;
+    await _plugin.cancel(id: _notificationId);
+  }
 }

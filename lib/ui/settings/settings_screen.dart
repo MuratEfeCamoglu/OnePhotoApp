@@ -1,23 +1,26 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../services/reminder_service.dart';
+import '../widgets/error_snackbar.dart';
 
 /// Settings: daily reminder (F7) and storage notice (F6g).
 class SettingsScreen extends StatefulWidget {
-  /// Creates the screen; [extraTiles] are appended (debug tools).
+  /// Creates the screen; [onGenerateDemoData] enables the debug tool.
   const SettingsScreen({
     super.key,
     required this.reminders,
-    this.extraTiles = const [],
+    this.onGenerateDemoData,
   });
 
   /// Reminder settings and scheduling.
   final ReminderService reminders;
 
-  /// Additional tiles shown at the bottom.
-  final List<Widget> extraTiles;
+  /// Fills the last 365 days with demo photos; returns the filled count
+  /// or `null` when no photo exists yet. Shown only outside release mode.
+  final Future<int?> Function()? onGenerateDemoData;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -75,6 +78,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _generateDemoData() async {
+    setState(() => _busy = true);
+    try {
+      final filled = await widget.onGenerateDemoData!();
+      _showMessage(
+        filled == null ? Strings.demoDataNeedsEntry : Strings.demoDataDone,
+      );
+    } on Exception catch (e) {
+      if (mounted) showErrorSnackBar(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,7 +120,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(color: AppColors.onSurfaceVariant),
             ),
           ),
-          ...widget.extraTiles,
+          if (!kReleaseMode && widget.onGenerateDemoData != null)
+            ListTile(
+              key: const ValueKey('demo-data'),
+              leading: const Icon(Icons.auto_awesome_motion_outlined),
+              title: const Text(Strings.demoDataButton),
+              enabled: !_busy,
+              onTap: _generateDemoData,
+            ),
         ],
       ),
     );

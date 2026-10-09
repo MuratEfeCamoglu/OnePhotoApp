@@ -115,6 +115,35 @@ class PhotoService {
     }
   }
 
+  /// Debug helper (ISKELET §6 stage 8): fills every empty day of the last
+  /// [days] days with a copy of the newest existing photo.
+  ///
+  /// Returns how many days were filled, or `null` without a usable photo.
+  Future<int?> fillDemoDays(int days) async {
+    final entries = await _repository.getAll()
+      ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+    File? source;
+    for (final entry in entries) {
+      final file = fileFor(entry);
+      if (file.existsSync()) {
+        source = file;
+        break;
+      }
+    }
+    if (source == null) return null;
+    final taken = {for (final e in entries) e.dateKey};
+    final today = _clock();
+    var filled = 0;
+    for (var i = 0; i < days; i++) {
+      // Calendar arithmetic instead of Duration keeps DST days intact.
+      final key = dateKeyOf(DateTime(today.year, today.month, today.day - i));
+      if (taken.contains(key)) continue;
+      await savePhoto(key, source);
+      filled++;
+    }
+    return filled;
+  }
+
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();

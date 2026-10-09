@@ -12,14 +12,14 @@ void main() {
   setUp(() async => h = await TestHarness.create());
   tearDown(() => h.dispose());
 
-  Future<void> pumpSettings(WidgetTester tester, {List<Widget>? extra}) async {
+  Future<void> pumpSettings(
+    WidgetTester tester, {
+    Future<int?> Function()? demo,
+  }) async {
     usePhoneSurface(tester);
     await tester.pumpWidget(
       OnePhotoApp(
-        home: SettingsScreen(
-          reminders: h.reminders,
-          extraTiles: extra ?? const [],
-        ),
+        home: SettingsScreen(reminders: h.reminders, onGenerateDemoData: demo),
       ),
     );
   }
@@ -120,8 +120,26 @@ void main() {
     expect(find.text('Saat: 21:45'), findsOneWidget);
   });
 
-  testWidgets('extra tiles are appended', (tester) async {
-    await pumpSettings(tester, extra: [const Text('extra')]);
-    expect(find.text('extra'), findsOneWidget);
+  testWidgets('no demo tool without a generator', (tester) async {
+    await pumpSettings(tester);
+    expect(find.text(Strings.demoDataButton), findsNothing);
+  });
+
+  testWidgets('demo tool (debug builds) reports success', (tester) async {
+    var calls = 0;
+    await pumpSettings(tester, demo: () async => ++calls);
+    await tester.tap(find.text('365 günlük demo veri üret'));
+    await tester.pumpAndSettle();
+    expect(calls, 1);
+    expect(find.text(Strings.demoDataDone), findsOneWidget);
+  });
+
+  testWidgets('demo tool asks for a first photo when there is none', (
+    tester,
+  ) async {
+    await pumpSettings(tester, demo: () async => null);
+    await tester.tap(find.text(Strings.demoDataButton));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.demoDataNeedsEntry), findsOneWidget);
   });
 }

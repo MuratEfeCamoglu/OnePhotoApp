@@ -90,6 +90,15 @@ class TimelineController extends ChangeNotifier {
     return entry;
   }
 
+  /// Debug only: fills the last 365 days with copies of an existing photo.
+  ///
+  /// Returns the number of filled days, or `null` when there is no photo.
+  Future<int?> generateDemoData() async {
+    final filled = await _service.fillDemoDays(365);
+    if (filled != null) await load();
+    return filled;
+  }
+
   /// Deletes the photo of [dateKey].
   Future<void> deleteEntry(String dateKey) async {
     await _service.deleteEntry(dateKey);

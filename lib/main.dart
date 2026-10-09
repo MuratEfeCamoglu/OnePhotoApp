@@ -42,20 +42,26 @@ Future<void> main() async {
 
   final navigatorKey = GlobalKey<NavigatorState>();
   final scheduler = LocalNotificationScheduler();
-  // A tapped reminder brings the user back to the timeline (ISKELET F7d).
-  await scheduler.initialize(
-    onTap: () => navigatorKey.currentState?.popUntil((route) => route.isFirst),
-  );
   final reminders = ReminderService(settings: settings, scheduler: scheduler);
-  unawaited(reminders.restore());
 
   runApp(
     OnePhotoApp(
       navigatorKey: navigatorKey,
       home: TimelineScreen(
         controller: controller,
-        settingsBuilder: (_) => SettingsScreen(reminders: reminders),
+        settingsBuilder: (_) => SettingsScreen(
+          reminders: reminders,
+          onGenerateDemoData: controller.generateDemoData,
+        ),
       ),
     ),
   );
+
+  // Loading the time zone database is slow; doing it after the first frame
+  // keeps cold start within budget (ISKELET §1). Scheduler calls wait for it.
+  await scheduler.initialize(
+    // A tapped reminder brings the user back to the timeline (ISKELET F7d).
+    onTap: () => navigatorKey.currentState?.popUntil((route) => route.isFirst),
+  );
+  await reminders.restore();
 }

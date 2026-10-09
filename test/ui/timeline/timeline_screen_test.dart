@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:one_photo_app/core/date_key.dart';
 import 'package:one_photo_app/core/strings.dart';
 import 'package:one_photo_app/ui/settings/settings_screen.dart';
 import 'package:one_photo_app/ui/timeline/day_cell.dart';
+import 'package:one_photo_app/ui/timeline/month_grid.dart';
 
 import '../../fakes.dart';
 import '../pump.dart';
@@ -174,6 +176,19 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text(Strings.takePhoto), findsNothing);
+  });
+
+  testWidgets('365 entries: only months near the viewport are built (§5)', (
+    tester,
+  ) async {
+    final days = [
+      for (var i = 0; i < 365; i++) dateKeyOf(DateTime(2026, 10, 9 - i)),
+    ];
+    h = await TestHarness.create(photoDays: days);
+    await pumpTimeline(tester, h);
+    expect(h.controller.entryCount, 365);
+    expect(find.byType(MonthGrid).evaluate().length, lessThan(4));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('startup error is shown as a SnackBar (F8b)', (tester) async {

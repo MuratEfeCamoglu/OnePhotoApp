@@ -206,6 +206,26 @@ void main() {
     });
   });
 
+  group('fillDemoDays', () {
+    test('without a photo returns null and adds nothing', () async {
+      expect(await service.fillDemoDays(365), isNull);
+      expect(repo.rows, isEmpty);
+    });
+
+    test('fills every empty day of the last N days, keeps existing', () async {
+      final original = await service.savePhoto('2026-10-05', source());
+      final filled = await service.fillDemoDays(365);
+
+      expect(filled, 364);
+      expect(repo.rows, hasLength(365));
+      expect(repo.rows['2026-10-05'], original);
+      expect(repo.rows.containsKey('2026-10-09'), isTrue);
+      expect(repo.rows.containsKey('2025-10-10'), isTrue);
+      expect(repo.rows.containsKey('2025-10-09'), isFalse);
+      expect(await storage.listFileNames(), hasLength(365));
+    });
+  });
+
   test('loadAll returns repository entries', () async {
     final e = Entry(
       dateKey: '2026-10-01',
