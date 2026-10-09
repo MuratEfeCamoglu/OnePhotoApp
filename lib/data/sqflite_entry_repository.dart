@@ -12,14 +12,16 @@ class SqfliteEntryRepository implements EntryRepository {
   /// Database file name inside the platform databases directory.
   static const fileName = 'one_photo.db';
 
-  /// Schema version; bumping it requires a migration.
-  static const schemaVersion = 1;
+  /// Schema version; bumping it requires a migration in [_upgrade].
+  ///
+  /// 1: initial table. 2: nullable `note` column (ISKELET F11).
+  static const schemaVersion = 2;
 
   static const _table = 'entries';
 
   final Database _db;
 
-  /// Opens (and creates on first run) the database at [path].
+  /// Opens (and creates or migrates) the database at [path].
   static Future<SqfliteEntryRepository> open(
     DatabaseFactory factory,
     String path,
@@ -33,12 +35,19 @@ class SqfliteEntryRepository implements EntryRepository {
             date_key TEXT PRIMARY KEY,
             file_name TEXT NOT NULL,
             created_at INTEGER NOT NULL,
-            updated_at INTEGER NOT NULL
+            updated_at INTEGER NOT NULL,
+            note TEXT
           )
         '''),
+        onUpgrade: _upgrade,
       ),
     );
     return SqfliteEntryRepository(db);
+  }
+
+  // Additive steps only, so existing photos stay reachable after updates.
+  static Future<void> _upgrade(Database db, int from, int to) async {
+    if (from < 2) await db.execute('ALTER TABLE $_table ADD COLUMN note TEXT');
   }
 
   /// Closes the underlying database.

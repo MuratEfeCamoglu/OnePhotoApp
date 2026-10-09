@@ -58,7 +58,7 @@ class DayDetailScreen extends StatelessWidget {
             ),
           );
           if (!file.existsSync()) return SizedBox.expand(child: broken);
-          return InteractiveViewer(
+          final viewer = InteractiveViewer(
             minScale: 1,
             maxScale: 4,
             child: SizedBox.expand(
@@ -73,6 +73,26 @@ class DayDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
+          );
+          if (!entry.hasNote) return viewer;
+          return Column(
+            children: [
+              Expanded(child: viewer),
+              Container(
+                key: const ValueKey('detail-note'),
+                width: double.infinity,
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: p.surface,
+                  borderRadius: BorderRadius.circular(AppDimens.cardRadius),
+                ),
+                child: Text(
+                  entry.note!,
+                  style: AppText.body.copyWith(color: p.onSurface, height: 1.4),
+                ),
+              ),
+            ],
           );
         },
       ),

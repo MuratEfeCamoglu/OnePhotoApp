@@ -233,7 +233,8 @@ class _Section extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
-              title.toUpperCase(),
+              // No toUpperCase: it turns Turkish "Dil" into "DIL", not "DİL".
+              title,
               style: AppText.section.copyWith(color: p.dayMuted),
             ),
           ),

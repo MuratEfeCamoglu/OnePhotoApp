@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
-import '../day_detail/day_detail_screen.dart';
+import '../day_detail/day_preview.dart';
 import '../widgets/add_photo_flow.dart';
 import '../widgets/error_snackbar.dart';
 import '../widgets/floating_nav_bar.dart';
@@ -80,12 +80,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
       chooseSourceAndAdd(context, _controller, dateKey);
       return;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            DayDetailScreen(controller: _controller, dateKey: dateKey),
-      ),
-    );
+    showDayPreview(context, _controller, dateKey);
   }
 
   @override
@@ -142,6 +137,8 @@ class _TimelineScreenState extends State<TimelineScreen> {
                             ? null
                             : _controller.fileFor(entry);
                       },
+                      hasNote: (key) =>
+                          _controller.entryFor(key)?.hasNote ?? false,
                       onDayTap: _onDayTap,
                     ),
                   );

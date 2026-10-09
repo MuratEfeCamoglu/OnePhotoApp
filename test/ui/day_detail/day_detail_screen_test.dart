@@ -14,13 +14,16 @@ void main() {
   late TestHarness h;
   tearDown(() => h.dispose());
 
+  // Cell → preview card → "Tam ekran" (ISKELET F5a, F11).
   Future<void> openDetail(WidgetTester tester, String key) async {
     await pumpTimeline(tester, h);
     await tester.tap(find.byKey(ValueKey('day-$key')));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('open-full')));
+    await tester.pumpAndSettle();
   }
 
-  testWidgets('tapping a photo cell opens the detail with the date (F5a)', (
+  testWidgets('preview → full screen opens the detail with the date (F5a)', (
     tester,
   ) async {
     h = await TestHarness.create(photoDays: ['2026-10-09']);

@@ -95,4 +95,16 @@ void main() {
     expect(h.controller.takePendingError(), isA<PhotoSaveException>());
     expect(h.controller.takePendingError(), isNull);
   });
+
+  test('updateNote stores the note and notifies once', () async {
+    h = await TestHarness.create(photoDays: ['2026-10-01']);
+    await h.controller.startup();
+    var notified = 0;
+    h.controller.addListener(() => notified++);
+    await h.controller.updateNote('2026-10-01', 'Merhaba');
+    expect(h.controller.entryFor('2026-10-01')!.note, 'Merhaba');
+    expect(notified, 1);
+    await h.controller.updateNote('2026-10-01', 'Merhaba');
+    expect(notified, 1, reason: 'unchanged note does not rebuild');
+  });
 }

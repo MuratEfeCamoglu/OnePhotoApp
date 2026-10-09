@@ -66,4 +66,48 @@ void main() {
     expect((await second.getAll()).single.fileName, 'a.jpg');
     await second.close();
   });
+
+  test('stores and reads a note (F11)', () async {
+    await repo.upsert(_entry('2026-10-09', 'a.jpg').withNote('Not'));
+    expect((await repo.getByDate('2026-10-09'))!.note, 'Not');
+  });
+
+  test('v1 database migrates to v2 keeping every row (F11)', () async {
+    final dir = await Directory.systemTemp.createTemp('onephoto_migrate');
+    addTearDown(() => dir.delete(recursive: true));
+    final path = p.join(dir.path, SqfliteEntryRepository.fileName);
+    // Exactly the schema shipped as version 1.
+    final v1 = await databaseFactoryFfi.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: (db, _) => db.execute('''
+          CREATE TABLE entries (
+            date_key TEXT PRIMARY KEY,
+            file_name TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          )
+        '''),
+      ),
+    );
+    await v1.insert('entries', {
+      'date_key': '2026-10-01',
+      'file_name': 'old.jpg',
+      'created_at': 1,
+      'updated_at': 2,
+    });
+    await v1.close();
+
+    final migrated = await SqfliteEntryRepository.open(
+      databaseFactoryFfi,
+      path,
+    );
+    final rows = await migrated.getAll();
+    expect(rows.single.fileName, 'old.jpg');
+    expect(rows.single.note, isNull);
+    await migrated.upsert(rows.single.withNote('yeni'));
+    expect((await migrated.getByDate('2026-10-01'))!.note, 'yeni');
+    await migrated.close();
+  });
 }

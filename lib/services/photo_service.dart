@@ -67,6 +67,8 @@ class PhotoService {
       fileName: fileName,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
+      // A new photo does not erase what the user wrote about the day.
+      note: existing?.note,
     );
     try {
       await _repository.upsert(entry);
@@ -77,6 +79,26 @@ class PhotoService {
     }
     if (existing != null) await _deleteFileLater(existing.fileName);
     return entry;
+  }
+
+  /// Stores [note] for the photo of [dateKey] (ISKELET F11).
+  ///
+  /// Blank notes are removed. Returns the updated entry, or `null` when the
+  /// day has no photo.
+  Future<Entry?> saveNote(String dateKey, String note) async {
+    final existing = await _guard(() => _repository.getByDate(dateKey));
+    if (existing == null) return null;
+    final trimmed = note.trim();
+    final clipped = trimmed.length > Entry.maxNoteLength
+        ? trimmed.substring(0, Entry.maxNoteLength)
+        : trimmed;
+    final updated = existing.withNote(
+      clipped.isEmpty ? null : clipped,
+      updatedAt: _clock(),
+    );
+    if (updated.note == existing.note) return existing;
+    await _repository.upsert(updated);
+    return updated;
   }
 
   /// Removes the entry of [dateKey] and then its file.

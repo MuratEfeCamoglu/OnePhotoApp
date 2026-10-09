@@ -159,3 +159,11 @@ Referans: kullanıcının eklediği "One Photo / Day App" ekran görüntüsü (a
 - Yeni dosyalar: `state/appearance_controller.dart`, `ui/widgets/l10n.dart`, `ui/widgets/motion.dart`, `ui/widgets/floating_nav_bar.dart` (+ testleri), `test/core/strings_test.dart`.
 - ISKELET: F1g güncellendi, F9 ve F10 eklendi, V19–V20.
 Doğrulama: format ✅, analyze ✅, 173/173 test ✅, `flutter build apk --release` ✅, telefona kuruldu. Cihazda ekran kontrolü: telefon kilitli olduğu için bekliyor.
+
+## Gün önizlemesi + not (F11), görünüm düzeltmeleri
+- **Önizleme:** fotoğraflı güne dokununca kare fotoğraflı kart (Hero ile hücreden büyür), tarih, not alanı (500 karakter), "Tam ekran" ve "Kaydet". Kaydet / geri / kart dışına dokunma notu kaydeder; boş not silinir. Klavye açılınca fotoğraf 120 px'e küçülür. `ui/day_detail/day_preview.dart`.
+- **Not:** `Entry.note`, şema v2 (`note TEXT`, eklemeli geçiş), `PhotoService.saveNote`, `TimelineController.updateNote`; fotoğraf değişince not korunur; hücrede not rozeti; tam ekran detayda not kartı.
+- **Türkçe büyük harf hatası:** Ayarlar bölüm başlıkları `toUpperCase()` ile "DIL" oluyordu; büyük harfe çevirme kaldırıldı.
+- **Telefondaki siyah kareler:** test sırasında karanlıkta çekilen 9 Ekim fotoğrafı ve "demo veri" butonunun ürettiği 362 birebir kopyası (md5 `2d4515…`) telefondan silindi. Kullanıcının 1 ve 2 Ekim fotoğrafları korundu. Silmeden önce veritabanı yedeği alındı (scratchpad `one_photo_backup.db`). Gerçek cihazda v1→v2 şema geçişi doğrulandı.
+- Cihazda doğrulandı (Poco X3): alt çubuk, koyu tema, İngilizce, önizleme kartı, not yazma + geri tuşuyla kaydetme, not rozeti.
+Doğrulama: format ✅, analyze ✅, 196/196 test ✅.

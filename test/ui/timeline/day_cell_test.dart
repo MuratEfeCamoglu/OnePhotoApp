@@ -136,4 +136,25 @@ void main() {
     );
     expect(tester.widget<Hero>(find.byType(Hero)).tag, 'photo-2026-10-03');
   });
+
+  testWidgets('note badge only on photo days with a note', (tester) async {
+    final file = writeSourcePhoto(dir);
+    await _pump(
+      tester,
+      DayCell(
+        day: 3,
+        label: '3',
+        isToday: false,
+        isFuture: false,
+        photo: file,
+        hasNote: true,
+      ),
+    );
+    expect(find.byKey(const ValueKey('note-badge')), findsOneWidget);
+    await _pump(
+      tester,
+      DayCell(day: 3, label: '3', isToday: false, isFuture: false, photo: file),
+    );
+    expect(find.byKey(const ValueKey('note-badge')), findsNothing);
+  });
 }

@@ -60,6 +60,11 @@ abstract class Strings {
   String get deleteQuestion;
   String get delete;
 
+  String get noteLabel;
+  String get noteHint;
+  String get save;
+  String get fullScreen;
+
   String get homeTooltip;
   String get cameraTooltip;
   String get settingsTooltip;
@@ -140,6 +145,15 @@ class _TrStrings extends Strings {
   String get deleteQuestion => 'Bu günün fotoğrafı silinsin mi?';
   @override
   String get delete => 'Sil';
+
+  @override
+  String get noteLabel => 'Günün notu';
+  @override
+  String get noteHint => 'Bu gün nasıldı? Bir not yaz…';
+  @override
+  String get save => 'Kaydet';
+  @override
+  String get fullScreen => 'Tam ekran';
 
   @override
   String get homeTooltip => 'Ana sayfa';
@@ -241,6 +255,15 @@ class _EnStrings extends Strings {
   String get deleteQuestion => 'Delete this day\'s photo?';
   @override
   String get delete => 'Delete';
+
+  @override
+  String get noteLabel => 'Note of the day';
+  @override
+  String get noteHint => 'How was this day? Write a note…';
+  @override
+  String get save => 'Save';
+  @override
+  String get fullScreen => 'Full screen';
 
   @override
   String get homeTooltip => 'Home';

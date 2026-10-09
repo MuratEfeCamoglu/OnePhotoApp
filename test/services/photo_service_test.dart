@@ -236,4 +236,41 @@ void main() {
     repo.rows[e.dateKey] = e;
     expect(await service.loadAll(), [e]);
   });
+
+  group('saveNote (F11)', () {
+    test('trims, stores and returns the updated entry', () async {
+      await service.savePhoto('2026-10-09', source());
+      now = now.add(const Duration(hours: 1));
+      final updated = await service.saveNote('2026-10-09', '  Güzel gün  ');
+      expect(updated!.note, 'Güzel gün');
+      expect(repo.rows['2026-10-09']!.note, 'Güzel gün');
+      expect(updated.updatedAt, now);
+    });
+
+    test('blank text removes the note', () async {
+      await service.savePhoto('2026-10-09', source());
+      await service.saveNote('2026-10-09', 'x');
+      await service.saveNote('2026-10-09', '   ');
+      expect(repo.rows['2026-10-09']!.note, isNull);
+    });
+
+    test('no photo → nothing saved', () async {
+      expect(await service.saveNote('2026-10-09', 'x'), isNull);
+      expect(repo.rows, isEmpty);
+    });
+
+    test('over-long notes are clipped', () async {
+      await service.savePhoto('2026-10-09', source());
+      final updated = await service.saveNote('2026-10-09', 'a' * 600);
+      expect(updated!.note!.length, Entry.maxNoteLength);
+    });
+
+    test('replacing the photo keeps the note', () async {
+      await service.savePhoto('2026-10-09', source('a.jpg'));
+      await service.saveNote('2026-10-09', 'Kalsın');
+      now = now.add(const Duration(minutes: 1));
+      final replaced = await service.savePhoto('2026-10-09', source('b.jpg'));
+      expect(replaced.note, 'Kalsın');
+    });
+  });
 }

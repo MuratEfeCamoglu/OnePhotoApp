@@ -26,15 +26,16 @@ Terimler: **Gün anahtarı** = cihazın yerel saat dilimine göre `YYYY-MM-DD` m
 | F2 | **Bugünün fotoğrafını kameradan çek** | Zorunlu | (a) Ana ekrandaki alt çubuğun kamera düğmesine basınca sistem kamerası açılır. (b) Onaylanan fotoğraf bugünün kaydı olarak kaydedilir ve ekrana dönüldüğünde bugünün hücresinde **1 sn içinde** küçük resim görünür. (c) Kullanıcı kamerayı iptal ederse hiçbir veri değişmez. |
 | F3 | **Galeriden fotoğraf seç** | Zorunlu | (a) Boş bir geçmiş/bugün hücresine dokununca alttan "Fotoğraf çek / Galeriden seç / Vazgeç" seçenekli bir sayfa açılır. (b) Seçilen fotoğraf **dokunulan günün** kaydı olur (fotoğrafın EXIF tarihi dikkate alınmaz). (c) Kamera ikonu her zaman **bugün** içindir; hücre seçimi o hücrenin günü içindir. |
 | F4 | **Günde tek fotoğraf kuralı** | Zorunlu | (a) Bir gün anahtarı için veritabanında en fazla 1 kayıt bulunur (birincil anahtar = gün anahtarı). (b) Fotoğrafı olan bir güne yeni fotoğraf eklenmek istenirse "Bu günün fotoğrafı değiştirilsin mi?" onayı çıkar; "Vazgeç" seçilirse hiçbir şey değişmez. (c) Değiştirmede yeni dosya yazılıp kayıt güncellendikten **sonra** eski dosya silinir; işlem sonunda `photos/` klasöründe o güne ait tek dosya kalır. |
-| F5 | **Gün detayı** | Zorunlu | (a) Fotoğraflı hücreye dokununca tam ekran detay açılır: fotoğraf (sığdırılmış, iki parmakla 1x–4x yakınlaştırma), üstte "9 Ekim 2026, Cuma" biçiminde tarih. (b) "Değiştir" eylemi F3'teki seçenek sayfasını açar ve F4(b) onayını uygular. (c) "Sil" eylemi onay ister; onaylanınca kayıt ve dosya silinir, ana ekrana dönülür ve hücre boş görünür. |
+| F5 | **Gün detayı** | Zorunlu | (a) Fotoğraflı hücreye dokununca önizleme kartı (F11) açılır; karttaki "Tam ekran" veya fotoğrafa dokunma tam ekran detayı açar: fotoğraf (sığdırılmış, iki parmakla 1x–4x yakınlaştırma), üstte "9 Ekim 2026, Cuma" biçiminde tarih. (b) "Değiştir" eylemi F3'teki seçenek sayfasını açar ve F4(b) onayını uygular. (c) "Sil" eylemi onay ister; onaylanınca kayıt ve dosya silinir, ana ekrana dönülür ve hücre boş görünür. |
 | F6 | **Kalıcı ve çevrimdışı saklama** | Zorunlu | (a) Fotoğraflar uygulamanın belge dizini altında `photos/` klasörüne kopyalanır; galerideki orijinal silinse bile uygulamadaki kopya görünmeye devam eder. (b) Veritabanında **sadece dosya adı** saklanır, mutlak yol saklanmaz (iOS konteyner yolu güncellemelerde değişir). (c) Uygulama kapatılıp açıldığında tüm kayıtlar aynen görünür. (d) Kaydedilen fotoğrafın uzun kenarı ≤ 2048 px, JPEG kalite 85'tir. (e) Dosyası diskte bulunmayan kayıt, uygulamayı çökertmez; hücrede kırık-resim ikonu gösterilir. (f) Açılışta, DB'de hiçbir kaydın referans vermediği `photos/` dosyaları silinir (yetim temizliği). (g) Ayarlar ekranında "Fotoğraflar sadece bu cihazda saklanır; uygulamayı silersen kaybolur." bilgi metni görünür. |
 | F7 | **Günlük hatırlatma bildirimi** | Önemli (süre aşılırsa ilk ertelenecek özellik) | (a) Ayarlar ekranında açık/kapalı anahtarı ve saat seçici vardır; varsayılan **kapalı**, varsayılan saat **20:00**. (b) Açıldığında bildirim izni istenir; izin reddedilirse anahtar kapalıya döner ve "Bildirim izni verilmedi" mesajı görünür. (c) Açıkken her gün seçilen saatte (Android'de ±15 dk sapma kabul) "Bugünün fotoğrafını ekledin mi?" yerel bildirimi gelir. (d) Bildirime dokunmak uygulamayı ana ekranda açar. (e) Ayar uygulama yeniden başlatıldığında korunur. (f) Cihaz yeniden başlatıldıktan sonra da bildirim gelmeye devam eder. (g) Saat seçici ve sistem diyalogları Türkçe görünür. |
 | F8 | **İzin ve hata durumları** | Zorunlu | (a) Kamera/galeri izni reddedilirse uygulama çökmez; "Kamera izni gerekli. Ayarlar > OnePhoto üzerinden izin verebilirsin." biçiminde SnackBar gösterilir. (b) Dosya yazma veya veritabanı hatasında "Fotoğraf kaydedilemedi, tekrar dene." SnackBar'ı gösterilir ve yarım kalan dosya silinir. (c) iOS `Info.plist` içinde `NSCameraUsageDescription` ve `NSPhotoLibraryUsageDescription` Türkçe açıklamalarla tanımlıdır. |
 | F9 | **Koyu tema** | Önemli | (a) Ayarlar'da "Görünüm" seçimi: Sistem / Açık / Koyu; varsayılan Sistem. (b) Seçim anında, animasyonlu uygulanır ve yeniden başlatmada korunur. (c) Koyu temada tüm ekranlar koyu paletle okunaklıdır. |
 | F10 | **Dil seçimi** | Önemli | (a) Ayarlar'da "Dil" seçimi: Türkçe / English; varsayılan Türkçe. (b) Seçim anında tüm metinleri, ay/gün adlarını, tarih biçimini ve sistem diyaloglarını değiştirir; yeniden başlatmada korunur. (c) Açık hatırlatmanın bildirim metni seçili dile geçer. |
+| F11 | **Gün önizlemesi ve not** | Önemli | (a) Fotoğraflı güne dokununca kare fotoğraflı, sabit boyutlu bir önizleme kartı açılır (tarih + not alanı + "Tam ekran" + "Kaydet"). (b) Not en fazla 500 karakterdir; "Kaydet", geri tuşu veya kart dışına dokunma notu kaydeder; boş not silinir. (c) Notu olan günün hücresinde küçük not işareti görünür; tam ekran detayda not fotoğrafın altında gösterilir. (d) Fotoğraf değiştirilince not korunur. (e) Klavye açıkken fotoğraf küçülür, not alanı ve butonlar görünür kalır. |
 
 ### Sonraki Sürümler (MVP sonrası, şimdi yapılmayacak)
-- Fotoğrafa kısa not / ruh hali ekleme.
+- Güne ruh hali ekleme.
 - Seri (streak) sayacı ve istatistikler.
 - Yedekleme / dışa aktarma (ZIP), iCloud / Google Drive senkronizasyonu.
 - Fotoğraflardan timelapse video veya kolaj üretme.
@@ -71,7 +72,7 @@ Terimler: **Gün anahtarı** = cihazın yerel saat dilimine göre `YYYY-MM-DD` m
 - **Navigasyon:** Navigator 1.0 (`MaterialPageRoute`). Ekranlar: Timeline (ana) → DayDetail, Timeline → Settings.
 - **Veri modeli:**
 
-  `entries` tablosu (sqflite, veritabanı dosyası `one_photo.db`, şema sürümü 1):
+  `entries` tablosu (sqflite, veritabanı dosyası `one_photo.db`, şema sürümü 2):
 
   | Sütun | Tip | Kural |
   |---|---|---|
@@ -79,8 +80,9 @@ Terimler: **Gün anahtarı** = cihazın yerel saat dilimine göre `YYYY-MM-DD` m
   | `file_name` | TEXT | NOT NULL, örn. `2026-10-09_1760000000000.jpg` |
   | `created_at` | INTEGER | NOT NULL, epoch ms (kaydın ilk oluşturulması) |
   | `updated_at` | INTEGER | NOT NULL, epoch ms (son değiştirme) |
+  | `note` | TEXT | NULL olabilir, en fazla 500 karakter (F11; şema v2'de eklendi) |
 
-  Dart modeli: `Entry { String dateKey; String fileName; DateTime createdAt; DateTime updatedAt; }` — değişmez (immutable), `toMap()` / `fromMap()` içerir.
+  Dart modeli: `Entry { String dateKey; String fileName; DateTime createdAt; DateTime updatedAt; String? note; }` — değişmez (immutable), `toMap()` / `fromMap()` içerir.
 
   Ayarlar (shared_preferences): `reminder_enabled: bool` (varsayılan `false`), `reminder_minutes: int` (gece yarısından itibaren dakika, varsayılan `1200` = 20:00), `pending_date_key: String?` (açık bir picker işleminin hedef günü; işlem bitince silinir).
 
@@ -207,3 +209,4 @@ Toplam tahmin: ~10 gün (6–12 gün aralığında).
 - **V18 — Uygulama simgesi:** Onaylı listede simge üreten paket olmadığı için simgeler (Android eski tip + adaptif, iOS AppIcon seti) elle üretilip depoya PNG olarak eklendi. Tasarım: vurgu rengi `#C2410C` gradyan zemin, 3×3 takvim ızgarası, ortadaki "bugün" hücresinde fotoğraf motifi.
 - **V19 — Kapsam değişikliği (kullanıcı isteği, 2026-10-09):** Koyu tema (F9) ve İngilizce dil desteği (F10) "Sonraki Sürümler"den MVP kapsamına alındı. F1g, referans ekran görüntüsüne uygun olarak alt yüzen gezinme çubuğuna (ana sayfa / kamera / ayarlar) çevrildi. V6 ve V12 bu yönde güncellenmiş sayılır.
 - **V20 — Saat biçimi:** Hatırlatma saati her iki dilde de 24 saat biçiminde gösterilir ve seçilir.
+- **V21 — Şema v2 (kullanıcı isteği, 2026-10-09):** Gün notu için `entries` tablosuna NULL olabilen `note TEXT` sütunu eklendi. Geçiş yalnızca ekleme yapar (`ALTER TABLE … ADD COLUMN`), mevcut kayıtlar ve dosyalar değişmez; v1→v2 geçişi otomatik testle ve gerçek cihazda doğrulandı.

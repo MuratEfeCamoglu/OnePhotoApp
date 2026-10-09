@@ -19,6 +19,7 @@ class DayCell extends StatelessWidget {
     required this.isFuture,
     this.photo,
     this.heroTag,
+    this.hasNote = false,
     this.onTap,
   });
 
@@ -40,6 +41,9 @@ class DayCell extends StatelessWidget {
   /// Hero tag linking the thumbnail to the detail screen.
   final String? heroTag;
 
+  /// Shows a small note badge on the photo (ISKELET F11).
+  final bool hasNote;
+
   /// Called on tap; ignored for future days.
   final VoidCallback? onTap;
 
@@ -59,6 +63,7 @@ class DayCell extends StatelessWidget {
         day: day,
         bold: isToday,
         heroTag: heroTag,
+        hasNote: hasNote,
       );
     } else if (missing) {
       content = _MissingContent(key: const ValueKey('missing'), day: day);
@@ -149,12 +154,14 @@ class _PhotoContent extends StatelessWidget {
     required this.day,
     required this.bold,
     this.heroTag,
+    this.hasNote = false,
   });
 
   final File file;
   final int day;
   final bool bold;
   final String? heroTag;
+  final bool hasNote;
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +199,18 @@ class _PhotoContent extends StatelessWidget {
               ),
             ),
           ),
+          if (hasNote)
+            const Positioned(
+              top: 3,
+              right: 3,
+              child: Icon(
+                Icons.sticky_note_2_rounded,
+                key: ValueKey('note-badge'),
+                size: 12,
+                color: Colors.white,
+                shadows: [Shadow(color: Color(0x99000000), blurRadius: 3)],
+              ),
+            ),
           Positioned(
             left: 0,
             right: 0,

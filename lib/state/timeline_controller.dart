@@ -99,6 +99,14 @@ class TimelineController extends ChangeNotifier {
     return filled;
   }
 
+  /// Saves the note of [dateKey]'s photo; blank text removes it.
+  Future<void> updateNote(String dateKey, String note) async {
+    final updated = await _service.saveNote(dateKey, note);
+    if (updated == null || updated == _entries[dateKey]) return;
+    _entries[dateKey] = updated;
+    notifyListeners();
+  }
+
   /// Deletes the photo of [dateKey].
   Future<void> deleteEntry(String dateKey) async {
     await _service.deleteEntry(dateKey);

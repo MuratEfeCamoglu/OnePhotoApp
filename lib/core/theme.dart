@@ -161,9 +161,9 @@ abstract final class AppText {
   static const body = TextStyle(fontSize: 16);
   static const label = TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
   static const section = TextStyle(
-    fontSize: 13,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.4,
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.1,
   );
   static const weekday = TextStyle(
     fontSize: 11,

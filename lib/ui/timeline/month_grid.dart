@@ -18,6 +18,7 @@ class MonthGrid extends StatelessWidget {
     required this.todayKey,
     required this.photoFor,
     required this.onDayTap,
+    this.hasNote,
   });
 
   /// Month to render.
@@ -28,6 +29,9 @@ class MonthGrid extends StatelessWidget {
 
   /// Photo file of a day key, or `null` if the day is empty.
   final File? Function(String dateKey) photoFor;
+
+  /// Whether a day has a note (ISKELET F11); none when `null`.
+  final bool Function(String dateKey)? hasNote;
 
   /// Called with the day key of a tapped (non-future) cell.
   final ValueChanged<String> onDayTap;
@@ -87,6 +91,7 @@ class MonthGrid extends StatelessWidget {
       isFuture: compare > 0,
       photo: photo,
       heroTag: photo == null ? null : photoHeroTag(key),
+      hasNote: hasNote?.call(key) ?? false,
       onTap: () => onDayTap(key),
     );
   }

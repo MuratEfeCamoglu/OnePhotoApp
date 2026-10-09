@@ -17,6 +17,7 @@ void main() {
       'file_name': '2026-10-09_1760000000000.jpg',
       'created_at': 1760000000000,
       'updated_at': 1760000005000,
+      'note': null,
     });
   });
 
@@ -35,5 +36,22 @@ void main() {
     expect(entry.copyWith(), entry);
     expect(entry.hashCode, entry.copyWith().hashCode);
     expect(entry == entry.copyWith(dateKey: '2026-10-10'), isFalse);
+  });
+
+  test('note round-trips and withNote can clear it', () {
+    final noted = entry.withNote('Sahilde gün batımı');
+    expect(noted.hasNote, isTrue);
+    expect(Entry.fromMap(noted.toMap()), noted);
+    expect(noted.withNote(null).hasNote, isFalse);
+    expect(noted == entry, isFalse);
+  });
+
+  test('copyWith keeps the note', () {
+    expect(entry.withNote('x').copyWith(fileName: 'y.jpg').note, 'x');
+  });
+
+  test('rows written before notes existed read as no note', () {
+    final legacy = Map.of(entry.toMap())..remove('note');
+    expect(Entry.fromMap(legacy).note, isNull);
   });
 }
