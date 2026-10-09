@@ -9,6 +9,7 @@ import '../../data/entry.dart';
 import '../../state/timeline_controller.dart';
 import '../day_detail/day_preview.dart';
 import '../widgets/category_style.dart';
+import '../widgets/floating_nav_bar.dart';
 import '../widgets/l10n.dart';
 import '../widgets/motion.dart';
 
@@ -19,13 +20,21 @@ String galleryHeroTag(String dateKey) => 'gallery-$dateKey';
 /// All photos as a 3 column grid, newest first (ISKELET F13).
 class GalleryView extends StatefulWidget {
   /// Creates the gallery over [controller]'s entries.
-  const GalleryView({super.key, required this.controller, this.scroll});
+  const GalleryView({
+    super.key,
+    required this.controller,
+    this.scroll,
+    this.onSettings,
+  });
 
   /// Source of entries.
   final TimelineController controller;
 
   /// Lets the bottom bar scroll the gallery back to the top.
   final ScrollController? scroll;
+
+  /// Opens settings from the top-right button; hidden when `null`.
+  final VoidCallback? onSettings;
 
   @override
   State<GalleryView> createState() => _GalleryViewState();
@@ -59,25 +68,37 @@ class _GalleryViewState extends State<GalleryView> {
                 bottom: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        s.galleryTitle,
-                        style: AppText.appTitle.copyWith(
-                          fontSize: 32,
-                          color: p.onSurface,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.galleryTitle,
+                              style: AppText.appTitle.copyWith(
+                                fontSize: 32,
+                                color: p.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            AnimatedSwitcher(
+                              duration: AppMotion.short,
+                              child: Text(
+                                s.photoCount(shown.length),
+                                key: ValueKey(shown.length),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: p.dayMuted,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      AnimatedSwitcher(
-                        duration: AppMotion.short,
-                        child: Text(
-                          s.photoCount(shown.length),
-                          key: ValueKey(shown.length),
-                          style: TextStyle(fontSize: 14, color: p.dayMuted),
-                        ),
-                      ),
+                      if (widget.onSettings != null)
+                        SettingsButton(onPressed: widget.onSettings),
                     ],
                   ),
                 ),

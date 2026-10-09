@@ -157,4 +157,14 @@ void main() {
     expect(find.text('2 photos'), findsOneWidget);
     expect(find.text('Oct 2'), findsOneWidget);
   });
+
+  testWidgets('settings button in the gallery header opens settings', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    await openGallery(tester);
+    await tester.tap(find.byKey(const ValueKey('settings-button')));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.tr.storageInfo), findsOneWidget);
+  });
 }

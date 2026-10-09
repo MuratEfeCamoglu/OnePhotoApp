@@ -27,6 +27,12 @@ void main() {
     expect(find.text('OnePhoto'), findsOneWidget);
     expect(find.byKey(const ValueKey('camera-button')), findsOneWidget);
     expect(find.byIcon(Icons.settings_rounded), findsOneWidget);
+    // Settings sit in the top-right corner, above the title row.
+    final settings = tester.getCenter(
+      find.byKey(const ValueKey('settings-button')),
+    );
+    expect(settings.dx, greaterThan(300));
+    expect(settings.dy, lessThan(tester.getCenter(find.text('Pzt')).dy));
   });
 
   testWidgets('weekday header starts on Monday (F1d)', (tester) async {

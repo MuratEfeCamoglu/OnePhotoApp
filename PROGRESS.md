@@ -186,3 +186,7 @@ Doğrulama: format ✅, analyze ✅, 224/224 test ✅.
 - Galeri: büyük başlık + fotoğraf sayısı, 3 sütun kare ızgara (en yeni önce), karede kısa tarih + kategori rozeti + not işareti, karelerin sırayla belirmesi, kategori süzgeç çipleri, boş durum. Kareye dokununca salt okunur önizleme (Hero ile). `ui/timeline/gallery_view.dart`.
 - Sekmeler arası yumuşak geçiş; görünmeyen sekme geçiş bitince offstage (çizilmez), zaman çizelgesinin kaydırma konumu korunur.
 Doğrulama: format ✅, analyze ✅, 236/236 test ✅.
+
+## Düzen: ayarlar sağ üstte, alt çubuk Ana sayfa · Kamera · Galeri
+- Alt çubuk: Ana sayfa · Kamera (tam ortada) · Galeri. Ayarlar alt çubuktan çıktı; ana sayfa ve galeri başlığının sağ üstünde yuvarlak düğme (`SettingsButton`).
+Doğrulama: format ✅, analyze ✅, 238/238 test ✅.

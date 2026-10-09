@@ -106,7 +106,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
         index: _tab.index,
         children: [
           _timeline(p),
-          GalleryView(controller: _controller, scroll: _galleryScroll),
+          GalleryView(
+            controller: _controller,
+            scroll: _galleryScroll,
+            onSettings: _openSettings,
+          ),
         ],
       ),
       bottomNavigationBar: ListenableBuilder(
@@ -116,7 +120,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
           onHome: () => _selectTab(HomeTab.timeline),
           onGallery: () => _selectTab(HomeTab.gallery),
           onCamera: _controller.isLoading ? null : _onCameraPressed,
-          onSettings: _openSettings,
         ),
       ),
     );
@@ -135,6 +138,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
               subtitle: context.strings.appSubtitle,
               weekdays: context.strings.weekdaysShort,
               palette: p,
+              onSettings: _openSettings,
             ),
           ),
         ];
@@ -257,6 +261,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.subtitle,
     required this.weekdays,
     required this.palette,
+    required this.onSettings,
   });
 
   final double topPadding;
@@ -264,6 +269,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   final String subtitle;
   final List<String> weekdays;
   final AppPalette palette;
+  final VoidCallback onSettings;
 
   static const _weekdayHeight = 29.0;
   static const _collapsed = 56.0;
@@ -278,82 +284,93 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
     final t = (shrinkOffset / (_expanded - _collapsed)).clamp(0.0, 1.0);
-    final titleSize = 32 - 10 * t;
     return Material(
       color: palette.background,
       elevation: overlaps ? 0.5 : 0,
       shadowColor: Colors.black26,
-      child: Padding(
-        padding: EdgeInsets.only(top: topPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimens.gutter,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppText.appTitle.copyWith(
-                        fontSize: titleSize,
-                        color: palette.onSurface,
-                      ),
+      child: Stack(
+        children: [
+          Positioned.fill(child: _content(t)),
+          Positioned(
+            top: topPadding + 6,
+            right: 12,
+            child: SettingsButton(onPressed: onSettings),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _content(double t) {
+    final titleSize = 32 - 10 * t;
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppText.appTitle.copyWith(
+                      fontSize: titleSize,
+                      color: palette.onSurface,
                     ),
-                    // Subtitle fades and folds away as the title shrinks.
-                    ClipRect(
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        heightFactor: 1 - t,
-                        child: Opacity(
-                          opacity: (1 - t * 1.6).clamp(0.0, 1.0),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              subtitle,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: palette.dayMuted,
-                              ),
+                  ),
+                  // Subtitle fades and folds away as the title shrinks.
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      heightFactor: 1 - t,
+                      child: Opacity(
+                        opacity: (1 - t * 1.6).clamp(0.0, 1.0),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: palette.dayMuted,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(height: 10 - 4 * t),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              height: _weekdayHeight,
-              padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: palette.outline)),
-              ),
-              child: Row(
-                children: [
-                  for (final (i, name) in weekdays.indexed) ...[
-                    if (i > 0) const SizedBox(width: AppDimens.cellGap),
-                    Expanded(
-                      child: Text(
-                        name,
-                        textAlign: TextAlign.center,
-                        style: AppText.weekday.copyWith(
-                          color: palette.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                  SizedBox(height: 10 - 4 * t),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          Container(
+            height: _weekdayHeight,
+            padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: palette.outline)),
+            ),
+            child: Row(
+              children: [
+                for (final (i, name) in weekdays.indexed) ...[
+                  if (i > 0) const SizedBox(width: AppDimens.cellGap),
+                  Expanded(
+                    child: Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      style: AppText.weekday.copyWith(
+                        color: palette.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -17,7 +17,6 @@ void main() {
             onHome: () => calls.add('home'),
             onGallery: () => calls.add('gallery'),
             onCamera: cameraEnabled ? () => calls.add('camera') : null,
-            onSettings: () => calls.add('settings'),
           ),
         ),
       ),
@@ -29,27 +28,22 @@ void main() {
   double x(WidgetTester tester, String key) =>
       tester.getCenter(find.byKey(ValueKey(key))).dx;
 
-  testWidgets('order: home, gallery, camera, settings (F13)', (tester) async {
+  testWidgets('order: home, camera (centre), gallery (F13)', (tester) async {
     await pump(tester);
-    expect(x(tester, 'home-button'), lessThan(x(tester, 'gallery-button')));
-    expect(x(tester, 'gallery-button'), lessThan(x(tester, 'camera-button')));
-    expect(x(tester, 'camera-button'), lessThan(x(tester, 'settings-button')));
-    expect(find.byIcon(Icons.photo_camera), findsOneWidget);
-    expect(find.byIcon(Icons.photo_library_rounded), findsOneWidget);
+    expect(x(tester, 'home-button'), lessThan(x(tester, 'camera-button')));
+    expect(x(tester, 'camera-button'), lessThan(x(tester, 'gallery-button')));
+    expect(find.byKey(const ValueKey('settings-button')), findsNothing);
+    final centre = tester.getSize(find.byType(Scaffold)).width / 2;
+    expect(x(tester, 'camera-button'), closeTo(centre, 1));
   });
 
   testWidgets('each button calls its callback', (tester) async {
     final calls = await pump(tester);
-    for (final key in [
-      'home-button',
-      'gallery-button',
-      'camera-button',
-      'settings-button',
-    ]) {
+    for (final key in ['home-button', 'camera-button', 'gallery-button']) {
       await tester.tap(find.byKey(ValueKey(key)));
     }
     await tester.pumpAndSettle();
-    expect(calls, ['home', 'gallery', 'camera', 'settings']);
+    expect(calls, ['home', 'camera', 'gallery']);
   });
 
   testWidgets('the selected tab is highlighted', (tester) async {
@@ -86,6 +80,19 @@ void main() {
     await pump(tester);
     expect(find.byTooltip('Ana sayfa'), findsOneWidget);
     expect(find.byTooltip('Galeri'), findsOneWidget);
+  });
+
+  testWidgets('SettingsButton opens settings and has a tooltip', (
+    tester,
+  ) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(child: SettingsButton(onPressed: () => taps++)),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('settings-button')));
+    expect(taps, 1);
     expect(find.byTooltip('Ayarlar'), findsOneWidget);
   });
 }

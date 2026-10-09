@@ -9,8 +9,8 @@ import 'motion.dart';
 /// Tabs of the home screen reachable from the bottom bar.
 enum HomeTab { timeline, gallery }
 
-/// Frosted pill at the bottom: home, gallery, today's camera, settings
-/// (ISKELET F1g, F13).
+/// Frosted pill at the bottom: home, today's camera, gallery
+/// (ISKELET F1g, F13). Settings live in the top-right corner instead.
 class FloatingNavBar extends StatelessWidget {
   /// Creates the bar; a `null` callback disables its button.
   const FloatingNavBar({
@@ -19,7 +19,6 @@ class FloatingNavBar extends StatelessWidget {
     required this.onHome,
     required this.onGallery,
     required this.onCamera,
-    required this.onSettings,
   });
 
   /// Highlighted tab.
@@ -33,9 +32,6 @@ class FloatingNavBar extends StatelessWidget {
 
   /// Takes today's photo.
   final VoidCallback? onCamera;
-
-  /// Opens the settings screen.
-  final VoidCallback? onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -80,22 +76,15 @@ class FloatingNavBar extends StatelessWidget {
                         selected: selected == HomeTab.timeline,
                         onTap: onHome,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 10),
+                      _CameraButton(tooltip: s.cameraTooltip, onTap: onCamera),
+                      const SizedBox(width: 10),
                       _NavButton(
                         key: const ValueKey('gallery-button'),
                         icon: Icons.photo_library_rounded,
                         tooltip: s.galleryTitle,
                         selected: selected == HomeTab.gallery,
                         onTap: onGallery,
-                      ),
-                      const SizedBox(width: 10),
-                      _CameraButton(tooltip: s.cameraTooltip, onTap: onCamera),
-                      const SizedBox(width: 10),
-                      _NavButton(
-                        key: const ValueKey('settings-button'),
-                        icon: Icons.settings_rounded,
-                        tooltip: s.settingsTooltip,
-                        onTap: onSettings,
                       ),
                     ],
                   ),
@@ -211,6 +200,38 @@ class _CameraButton extends StatelessWidget {
                   child: Icon(Icons.photo_camera, size: 28, color: p.onAccent),
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Round settings button for the top-right corner of the home tabs.
+class SettingsButton extends StatelessWidget {
+  /// Creates the button; [onPressed] opens the settings screen.
+  const SettingsButton({super.key, required this.onPressed});
+
+  /// Opens the settings screen.
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    return Tooltip(
+      message: context.strings.settingsTooltip,
+      child: PressScale(
+        child: Material(
+          color: p.surface,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            key: const ValueKey('settings-button'),
+            onTap: onPressed,
+            child: SizedBox.square(
+              dimension: 44,
+              child: Icon(Icons.settings_rounded, size: 24, color: p.onSurface),
             ),
           ),
         ),
