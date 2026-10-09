@@ -4,8 +4,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 
 | Aşama | Durum | Commit |
 |---|---|---|
-| 1. Kurulum | ✅ | (bu commit) |
-| 2. Çekirdek mantık | ⏳ | |
+| 1. Kurulum | ✅ | 29a3b78 |
+| 2. Çekirdek mantık | ✅ | (bu commit) |
 | 3. Veri katmanı | ⏳ | |
 | 4. Zaman çizelgesi UI | ⏳ | |
 | 5. Ekleme akışları | ⏳ | |
@@ -24,3 +24,13 @@ Kriterler:
 Test: `test/app_test.dart` (Türkçe locale). `flutter run` → cihaz yok, doğrulanmadı; yerine `flutter build apk --debug`.
 
 Doğrulama: format ✅, analyze "No issues found" ✅, test 1/1 ✅, `flutter build apk --debug` ✅.
+
+## Aşama 2 — Çekirdek mantık
+Kriterler → testler:
+- Ay başı hafta günü hizası (≥3 ay): `calendar_test` Ekim 2026 (Per, 3 boşluk), Haziran 2026 (Pzt), Mart 2026 (Paz, 6 boşluk), 2026'nın 12 ayının tamamı.
+- Artık yıl: 2028-02 = 29 gün (+2100 değil, 2000 artık).
+- Ay aralığı: kayıt yok → 12 ay; 2 yıl önceki kayıt → 25 ay, yeniden eskiye.
+- Gün anahtarı biçimi `YYYY-MM-DD`, 23:59/00:00 sınırları, UTC girişi yerel güne çevrilir.
+- Türkçe ay adları ("Ocak 2026", "Şubat 2026"), uzun tarih "9 Ekim 2026, Cuma".
+Dosyalar: `lib/core/date_key.dart`, `lib/core/calendar.dart`, `lib/data/entry.dart` + testleri.
+Doğrulama: format ✅, analyze ✅, test 32/32 ✅.
