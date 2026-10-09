@@ -6,8 +6,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 |---|---|---|
 | 1. Kurulum | ✅ | 29a3b78 |
 | 2. Çekirdek mantık | ✅ | b1b0c45 |
-| 3. Veri katmanı | ✅ | (bu commit) |
-| 4. Zaman çizelgesi UI | ⏳ | |
+| 3. Veri katmanı | ✅ | b5e8aaa |
+| 4. Zaman çizelgesi UI | ✅ | (bu commit) |
 | 5. Ekleme akışları | ⏳ | |
 | 6. Gün detayı | ⏳ | |
 | 7. Hatırlatma | ⏳ | |
@@ -46,3 +46,18 @@ Kriterler → testler:
 - Ek: iptal hiçbir şeyi değiştirmez (F2c), galeri dokunulan güne yazar (F3b), `pending_date_key` picker açıkken saklanır ve kurtarma bu güne yazar (§7), izin reddi veri değiştirmez (F8a), DB kapat-aç sonrası kayıtlar korunur (F6c), kopya orijinal silinince de durur (F6a).
 Dosyalar: `entry_repository.dart`, `sqflite_entry_repository.dart`, `photo_storage.dart`, `services/photo_picker.dart` (muaf, sahtesi `test/fakes.dart`), `services/settings_store.dart` (pending anahtarı burada gerektiği için Aşama 3'te eklendi), `services/photo_service.dart`.
 Doğrulama: format ✅, analyze ✅, tüm testler ✅.
+
+## Aşama 4 — Zaman çizelgesi UI (F1, F6e, F6g)
+Kriterler → kanıt:
+- F1a aylar yeniden eskiye: `timeline_controller_test` (months.first = bugünün ayı), `timeline_screen_test` kaydırma.
+- F1b aralık: 12 ay / eski kayda kadar → `calendar_test`, `timeline_controller_test`, ekranda Kasım 2025 son ay.
+- F1c "Ekim 2026" başlığı → `month_grid_test`.
+- F1d 7 sütun, Pazartesi başlangıç, 1'i doğru sütun → `month_grid_test` x-konum kontrolü, haftalık başlık Pzt→Paz.
+- F1e küçük resim + gün no; boş gün gri no; gelecek %40 ve dokunulamaz; bugün çerçeve → `day_cell_test`, `month_grid_test`.
+- F1f boş durum mesajı ızgaranın üstünde, 12 ay yine var → `timeline_screen_test`.
+- F1g başlık "OnePhoto", kamera ve ayarlar ikonları; ayarlar ekranı açılır → `timeline_screen_test`.
+- 3 kayıt → 3 küçük resim hücresi; dosyası olmayan kayıt kırık-resim ikonu (F6e) → `timeline_screen_test`, `day_cell_test`.
+- F6g bilgi metni → `settings_screen_test`.
+- Performans: `Image.file(cacheWidth: 200)` (test ile kontrol), `ListView.builder` ile tembel aylar.
+Ek dosya: `ui/widgets/error_snackbar.dart` (F8 mesaj eşlemesi; açılış hataları SnackBar ile gösterilir).
+Doğrulama: format ✅, analyze ✅, 94/94 test ✅. Manuel: doğrulanmadı (cihaz yok).

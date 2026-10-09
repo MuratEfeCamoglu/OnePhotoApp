@@ -3,7 +3,12 @@ import 'dart:io';
 import 'package:one_photo_app/core/errors.dart';
 import 'package:one_photo_app/data/entry.dart';
 import 'package:one_photo_app/data/entry_repository.dart';
+import 'package:one_photo_app/data/photo_storage.dart';
 import 'package:one_photo_app/services/photo_picker.dart';
+import 'package:one_photo_app/services/photo_service.dart';
+import 'package:one_photo_app/services/settings_store.dart';
+import 'package:one_photo_app/state/timeline_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Map based [EntryRepository] that can simulate database failures.
 class FakeEntryRepository implements EntryRepository {
@@ -59,6 +64,100 @@ class FakePhotoPicker implements PhotoPicker {
 
   @override
   Future<File?> retrieveLost() async => lostResult;
+}
+
+/// [PhotoStorage] using synchronous I/O so widget tests (fake async) work.
+class SyncPhotoStorage extends PhotoStorage {
+  SyncPhotoStorage(super.directory) {
+    directory.createSync(recursive: true);
+  }
+
+  @override
+  Future<String> save(
+    File source, {
+    required String dateKey,
+    required DateTime now,
+  }) async {
+    if (!source.existsSync()) throw const PhotoSaveException('no source');
+    var stamp = now.millisecondsSinceEpoch;
+    while (resolve('${dateKey}_$stamp.jpg').existsSync()) {
+      stamp++;
+    }
+    final name = '${dateKey}_$stamp.jpg';
+    source.copySync(resolve(name).path);
+    return name;
+  }
+
+  @override
+  Future<void> delete(String fileName) async {
+    final file = resolve(fileName);
+    if (file.existsSync()) file.deleteSync();
+  }
+
+  @override
+  Future<List<String>> listFileNames() async => [
+    for (final f in directory.listSync().whereType<File>())
+      f.uri.pathSegments.last,
+  ];
+}
+
+/// Everything a widget test needs to drive a real [TimelineController].
+class TestHarness {
+  TestHarness._(this.root, this.repo, this.picker, this.storage, this.settings);
+
+  /// Builds a harness with [entries] whose files exist unless listed in
+  /// [missingFiles].
+  static Future<TestHarness> create({
+    Iterable<String> photoDays = const [],
+    Iterable<String> missingDays = const [],
+  }) async {
+    final root = Directory.systemTemp.createTempSync('onephoto_ui');
+    final storage = SyncPhotoStorage(Directory('${root.path}/photos'));
+    final now = DateTime(2026, 1, 1);
+    final entries = <Entry>[];
+    for (final day in [...photoDays, ...missingDays]) {
+      final name = '${day}_1.jpg';
+      if (!missingDays.contains(day)) {
+        writeSourcePhoto(storage.directory, name);
+      }
+      entries.add(
+        Entry(dateKey: day, fileName: name, createdAt: now, updatedAt: now),
+      );
+    }
+    SharedPreferences.setMockInitialValues({});
+    final settings = SettingsStore(await SharedPreferences.getInstance());
+    return TestHarness._(
+      root,
+      FakeEntryRepository(entries),
+      FakePhotoPicker(),
+      storage,
+      settings,
+    );
+  }
+
+  final Directory root;
+  final FakeEntryRepository repo;
+  final FakePhotoPicker picker;
+  final SyncPhotoStorage storage;
+  final SettingsStore settings;
+
+  /// The fixed "now" of UI tests: Friday 9 October 2026, noon.
+  DateTime now = DateTime(2026, 10, 9, 12);
+
+  late final PhotoService service = PhotoService(
+    repository: repo,
+    storage: storage,
+    picker: picker,
+    settings: settings,
+    clock: () => now,
+  );
+
+  late final TimelineController controller = TimelineController(
+    service: service,
+    clock: () => now,
+  );
+
+  void dispose() => root.deleteSync(recursive: true);
 }
 
 /// Writes a small fake "photo" file into [dir].
