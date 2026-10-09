@@ -8,8 +8,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 | 2. Çekirdek mantık | ✅ | b1b0c45 |
 | 3. Veri katmanı | ✅ | b5e8aaa |
 | 4. Zaman çizelgesi UI | ✅ | 6476121 |
-| 5. Ekleme akışları | ✅ | (bu commit) |
-| 6. Gün detayı | ⏳ | |
+| 5. Ekleme akışları | ✅ | 8ee82f9 |
+| 6. Gün detayı | ✅ | (bu commit) |
 | 7. Hatırlatma | ⏳ | |
 | 8. Cila ve teslim | ⏳ | |
 
@@ -79,3 +79,11 @@ Karar: Onay, picker açılmadan **önce** sorulur (kamera ikonu: onay → kamera
 Not: Android'de manifestte `CAMERA` izni olmadığı için sistem kamerası izin istemez; izin reddi pratikte iOS'ta oluşur.
 Ek dosya: `ui/widgets/add_photo_flow.dart` (+ test).
 Doğrulama: format ✅, analyze ✅, 111/111 test ✅. Manuel kontrol: doğrulanmadı (cihaz yok).
+
+## Aşama 6 — Gün detayı (F5)
+Kriterler → kanıt (`day_detail_screen_test`):
+- F5a fotoğraflı hücre → tam ekran detay, "9 Ekim 2026, Cuma" başlığı, `BoxFit.contain`, `InteractiveViewer` 1x–4x, tam boy decode (cacheWidth yok).
+- F5b "Değiştir" → seçenek sayfası → F4b onayı → fotoğraf değişir, tek dosya kalır.
+- F5c "Sil" onay ister; onayda kayıt + dosya silinir, ana ekrana dönülür, hücre boş. "Vazgeç" hiçbir şeyi değiştirmez.
+- Ek: dosyası olmayan kayıtta detay kırık-resim ikonu gösterir (F6e).
+Doğrulama: format ✅, analyze ✅, 117/117 test ✅. Manuel (iki parmak yakınlaştırma): doğrulanmadı (cihaz yok).

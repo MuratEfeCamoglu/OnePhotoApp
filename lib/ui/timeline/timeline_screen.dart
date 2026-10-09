@@ -4,6 +4,7 @@ import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
+import '../day_detail/day_detail_screen.dart';
 import '../widgets/add_photo_flow.dart';
 import '../widgets/error_snackbar.dart';
 import 'month_grid.dart';
@@ -65,7 +66,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
   void _onDayTap(String dateKey) {
     if (_controller.entryFor(dateKey) == null) {
       chooseSourceAndAdd(context, _controller, dateKey);
+      return;
     }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            DayDetailScreen(controller: _controller, dateKey: dateKey),
+      ),
+    );
   }
 
   @override
