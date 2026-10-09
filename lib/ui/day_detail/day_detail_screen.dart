@@ -156,7 +156,8 @@ class _ActionButton extends StatelessWidget {
           backgroundColor: background,
           foregroundColor: foreground,
           minimumSize: const Size(0, 48),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: Theme.of(context).textTheme.labelLarge!
+              .copyWith(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         onPressed: onPressed,
         icon: Icon(icon, size: 20),

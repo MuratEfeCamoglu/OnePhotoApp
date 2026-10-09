@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Theme-dependent colours; light values follow onephoto-mockup.html.
@@ -203,6 +204,11 @@ ThemeData buildTheme(Brightness brightness) {
     surfaceTint: Colors.transparent,
   );
   const buttonSize = Size(0, 44);
+  // Root styles (app bar title, buttons, SnackBar) are not merged with the
+  // ambient text style, so they take the platform font from the typography.
+  final type = Typography.material2021(platform: defaultTargetPlatform);
+  final base = brightness == Brightness.dark ? type.white : type.black;
+  final label = base.labelLarge!.merge(AppText.label);
   return ThemeData(
     brightness: brightness,
     colorScheme: scheme,
@@ -224,7 +230,9 @@ ThemeData buildTheme(Brightness brightness) {
       scrolledUnderElevation: 0,
       centerTitle: false,
       titleSpacing: 4,
-      titleTextStyle: AppText.screenTitle.copyWith(color: p.onSurface),
+      titleTextStyle: base.titleMedium!
+          .merge(AppText.screenTitle)
+          .copyWith(color: p.onSurface),
     ),
     dividerTheme: DividerThemeData(color: p.outline, thickness: 1, space: 1),
     bottomSheetTheme: BottomSheetThemeData(
@@ -252,7 +260,7 @@ ThemeData buildTheme(Brightness brightness) {
         minimumSize: buttonSize,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         shape: _rounded(AppDimens.buttonRadius),
-        textStyle: AppText.label,
+        textStyle: label,
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -261,7 +269,7 @@ ThemeData buildTheme(Brightness brightness) {
         minimumSize: buttonSize,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         shape: _rounded(AppDimens.buttonRadius),
-        textStyle: AppText.label,
+        textStyle: label,
       ),
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(
@@ -271,7 +279,7 @@ ThemeData buildTheme(Brightness brightness) {
         foregroundColor: p.onSurface,
         backgroundColor: p.surface,
         side: BorderSide(color: p.outline),
-        textStyle: AppText.label,
+        textStyle: label,
       ),
     ),
     switchTheme: SwitchThemeData(
@@ -292,10 +300,8 @@ ThemeData buildTheme(Brightness brightness) {
       insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       shape: _rounded(AppDimens.snackbarRadius),
       elevation: 6,
-      contentTextStyle: TextStyle(
-        fontSize: 14,
-        height: 1.43,
-        color: p.onSnackbar,
+      contentTextStyle: base.bodyMedium!.merge(
+        TextStyle(fontSize: 14, height: 1.43, color: p.onSnackbar),
       ),
     ),
   );

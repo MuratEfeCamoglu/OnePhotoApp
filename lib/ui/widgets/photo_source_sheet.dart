@@ -76,10 +76,8 @@ class PhotoSourceSheet extends StatelessWidget {
                 style: TextButton.styleFrom(
                   minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  textStyle: Theme.of(context).textTheme.labelLarge!
+                      .copyWith(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 onPressed: () => navigator.pop(),
                 child: Text(s.cancel),
