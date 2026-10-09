@@ -108,6 +108,74 @@ void main() {
     expect(find.text(Strings.storageInfo), findsOneWidget);
   });
 
+  Finder thumbIn(String key) => find.descendant(
+    of: find.byKey(ValueKey('day-$key')),
+    matching: find.byType(Image),
+  );
+
+  testWidgets('camera icon → photo lands in today\'s cell (F2a, F2b)', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    h.picker.cameraResult = writeSourcePhoto(h.root);
+    await pumpTimeline(tester, h);
+    expect(thumbIn('2026-10-09'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.pumpAndSettle();
+
+    expect(h.picker.cameraCalls, 1);
+    expect(thumbIn('2026-10-09'), findsOneWidget);
+    expect(find.text(Strings.emptyTimeline), findsNothing);
+  });
+
+  testWidgets('cancelling the camera changes nothing (F2c)', (tester) async {
+    h = await TestHarness.create();
+    await pumpTimeline(tester, h);
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.pumpAndSettle();
+    expect(h.repo.rows, isEmpty);
+    expect(find.text(Strings.emptyTimeline), findsOneWidget);
+  });
+
+  testWidgets('camera icon on a filled today asks before replacing (F4b)', (
+    tester,
+  ) async {
+    h = await TestHarness.create(photoDays: ['2026-10-09']);
+    await pumpTimeline(tester, h);
+    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.replaceQuestion), findsOneWidget);
+  });
+
+  testWidgets('empty past cell → sheet → gallery fills that day (F3)', (
+    tester,
+  ) async {
+    h = await TestHarness.create();
+    h.picker.galleryResult = writeSourcePhoto(h.root);
+    await pumpTimeline(tester, h);
+
+    await tester.tap(find.byKey(const ValueKey('day-2026-10-05')));
+    await tester.pumpAndSettle();
+    expect(find.text('5 Ekim 2026'), findsOneWidget);
+    await tester.tap(find.text(Strings.pickFromGallery));
+    await tester.pumpAndSettle();
+
+    expect(thumbIn('2026-10-05'), findsOneWidget);
+    expect(h.repo.rows.keys, ['2026-10-05']);
+  });
+
+  testWidgets('tapping a future cell opens nothing (F1e)', (tester) async {
+    h = await TestHarness.create();
+    await pumpTimeline(tester, h);
+    await tester.tap(
+      find.byKey(const ValueKey('day-2026-10-20')),
+      warnIfMissed: false,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.takePhoto), findsNothing);
+  });
+
   testWidgets('startup error is shown as a SnackBar (F8b)', (tester) async {
     h = await TestHarness.create();
     h.picker.lostResult = h.storage.resolve('does-not-exist.jpg');

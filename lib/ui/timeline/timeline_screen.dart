@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/strings.dart';
 import '../../core/theme.dart';
+import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
+import '../widgets/add_photo_flow.dart';
 import '../widgets/error_snackbar.dart';
 import 'month_grid.dart';
 
@@ -50,9 +52,21 @@ class _TimelineScreenState extends State<TimelineScreen> {
         .push(MaterialPageRoute<void>(builder: widget.settingsBuilder));
   }
 
-  void _onCameraPressed() {}
+  // The camera icon is always for today (ISKELET F3c).
+  void _onCameraPressed() {
+    addPhotoFlow(
+      context,
+      _controller,
+      _controller.todayKey,
+      PhotoSource.camera,
+    );
+  }
 
-  void _onDayTap(String dateKey) {}
+  void _onDayTap(String dateKey) {
+    if (_controller.entryFor(dateKey) == null) {
+      chooseSourceAndAdd(context, _controller, dateKey);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

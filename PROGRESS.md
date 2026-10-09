@@ -7,8 +7,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 | 1. Kurulum | ✅ | 29a3b78 |
 | 2. Çekirdek mantık | ✅ | b1b0c45 |
 | 3. Veri katmanı | ✅ | b5e8aaa |
-| 4. Zaman çizelgesi UI | ✅ | (bu commit) |
-| 5. Ekleme akışları | ⏳ | |
+| 4. Zaman çizelgesi UI | ✅ | 6476121 |
+| 5. Ekleme akışları | ✅ | (bu commit) |
 | 6. Gün detayı | ⏳ | |
 | 7. Hatırlatma | ⏳ | |
 | 8. Cila ve teslim | ⏳ | |
@@ -61,3 +61,21 @@ Kriterler → kanıt:
 - Performans: `Image.file(cacheWidth: 200)` (test ile kontrol), `ListView.builder` ile tembel aylar.
 Ek dosya: `ui/widgets/error_snackbar.dart` (F8 mesaj eşlemesi; açılış hataları SnackBar ile gösterilir).
 Doğrulama: format ✅, analyze ✅, 94/94 test ✅. Manuel: doğrulanmadı (cihaz yok).
+
+## Aşama 5 — Ekleme akışları (F2, F3, F4, F8)
+Kriterler → kanıt:
+- F2a kamera ikonu sistem kamerasını açar → `timeline_screen_test` (FakePhotoPicker.cameraCalls).
+- F2b onaylanan fotoğraf bugünün hücresinde küçük resim → `timeline_screen_test` (aynı frame'de görünür; gerçek cihazda 1 sn süresi: doğrulanmadı, cihaz yok).
+- F2c iptal → veri değişmez → `photo_service_test`, `timeline_controller_test`, `timeline_screen_test`.
+- F3a boş hücre → "Fotoğraf çek / Galeriden seç / Vazgeç" sayfası → `photo_source_sheet_test`, `timeline_screen_test`.
+- F3b seçilen fotoğraf dokunulan güne yazılır (EXIF yok sayılır) → `timeline_screen_test`, `photo_service_test`.
+- F3c kamera ikonu her zaman bugün → `timeline_screen_test` (2026-10-09).
+- F4b dolu güne ekleme onay sorar, "Vazgeç" hiçbir şey değiştirmez → `add_photo_flow_test`, `timeline_screen_test`.
+- F4c değiştirme sonrası tek dosya kalır → `add_photo_flow_test`, `photo_service_test`.
+- F8a izin reddi SnackBar, çökme yok → `add_photo_flow_test`, `error_snackbar_test`.
+- F8b kayıt hatası SnackBar + yarım dosya silinir → `add_photo_flow_test`, `photo_service_test`.
+- F8c Info.plist Türkçe izin metinleri → Aşama 1'de eklendi (`ios/Runner/Info.plist`).
+Karar: Onay, picker açılmadan **önce** sorulur (kamera ikonu: onay → kamera; hücre/Değiştir: sayfa → onay → picker). Böylece "Vazgeç" hiçbir dosya üretmez (V17).
+Not: Android'de manifestte `CAMERA` izni olmadığı için sistem kamerası izin istemez; izin reddi pratikte iOS'ta oluşur.
+Ek dosya: `ui/widgets/add_photo_flow.dart` (+ test).
+Doğrulama: format ✅, analyze ✅, 111/111 test ✅. Manuel kontrol: doğrulanmadı (cihaz yok).
