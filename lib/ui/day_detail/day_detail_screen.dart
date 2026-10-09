@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../core/date_key.dart';
-import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../state/timeline_controller.dart';
 import '../timeline/day_cell.dart';
 import '../widgets/add_photo_flow.dart';
 import '../widgets/error_snackbar.dart';
+import '../widgets/l10n.dart';
+import '../widgets/motion.dart';
 
 /// Full-screen photo of one day with replace and delete (ISKELET F5).
 class DayDetailScreen extends StatelessWidget {
@@ -26,8 +27,8 @@ class DayDetailScreen extends StatelessWidget {
   Future<void> _delete(BuildContext context) async {
     final confirmed = await confirmAction(
       context,
-      question: Strings.deleteQuestion,
-      confirmLabel: Strings.delete,
+      question: context.strings.deleteQuestion,
+      confirmLabel: context.strings.delete,
     );
     if (!confirmed || !context.mounted) return;
     try {
@@ -40,25 +41,23 @@ class DayDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
+    final s = context.strings;
     return Scaffold(
-      appBar: AppBar(title: Text(formatLongDate(dateKey))),
+      appBar: AppBar(title: Text(formatLongDate(dateKey, strings: s))),
       body: ListenableBuilder(
         listenable: controller,
         builder: (context, _) {
           final entry = controller.entryFor(dateKey);
           if (entry == null) return const SizedBox.expand();
           final file = controller.fileFor(entry);
-          const broken = ColoredBox(
-            color: AppColors.surface,
+          final broken = ColoredBox(
+            color: p.surface,
             child: Center(
-              child: Icon(
-                Icons.broken_image,
-                size: 48,
-                color: AppColors.dayMuted,
-              ),
+              child: Icon(Icons.broken_image, size: 48, color: p.dayMuted),
             ),
           );
-          if (!file.existsSync()) return const SizedBox.expand(child: broken);
+          if (!file.existsSync()) return SizedBox.expand(child: broken);
           return InteractiveViewer(
             minScale: 1,
             maxScale: 4,
@@ -79,36 +78,38 @@ class DayDetailScreen extends StatelessWidget {
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.only(bottom: 8),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppDimens.gutter,
-            AppDimens.gutter,
-            AppDimens.gutter,
-            0,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.autorenew,
-                  label: Strings.replace,
-                  background: AppColors.surface,
-                  foreground: AppColors.onSurface,
-                  onPressed: () =>
-                      chooseSourceAndAdd(context, controller, dateKey),
+        child: EntranceAnimation(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppDimens.gutter,
+              AppDimens.gutter,
+              AppDimens.gutter,
+              0,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.autorenew,
+                    label: s.replace,
+                    background: p.surface,
+                    foreground: p.onSurface,
+                    onPressed: () =>
+                        chooseSourceAndAdd(context, controller, dateKey),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.delete,
-                  label: Strings.delete,
-                  background: AppColors.errorContainer,
-                  foreground: AppColors.error,
-                  onPressed: () => _delete(context),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.delete,
+                    label: s.delete,
+                    background: p.errorContainer,
+                    foreground: p.error,
+                    onPressed: () => _delete(context),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -133,16 +134,18 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton.icon(
-      style: FilledButton.styleFrom(
-        backgroundColor: background,
-        foregroundColor: foreground,
-        minimumSize: const Size(0, 48),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    return PressScale(
+      child: FilledButton.icon(
+        style: FilledButton.styleFrom(
+          backgroundColor: background,
+          foregroundColor: foreground,
+          minimumSize: const Size(0, 48),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        label: Text(label),
       ),
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
-      label: Text(label),
     );
   }
 }

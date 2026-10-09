@@ -1,3 +1,4 @@
+import 'package:one_photo_app/core/strings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:one_photo_app/services/settings_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,5 +46,24 @@ void main() {
     expect(store.reminderEnabled, isTrue);
     expect(store.reminderMinutes, 60);
     expect(store.pendingDateKey, '2026-01-01');
+  });
+
+  test('theme and language default to system / Turkish and persist', () async {
+    final store = await _store();
+    expect(store.themePreference, ThemePreference.system);
+    expect(store.language, AppLanguage.tr);
+    await store.setThemePreference(ThemePreference.dark);
+    await store.setLanguage(AppLanguage.en);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('theme'), 'dark');
+    expect(prefs.getString('language'), 'en');
+    expect(SettingsStore(prefs).themePreference, ThemePreference.dark);
+    expect(SettingsStore(prefs).language, AppLanguage.en);
+  });
+
+  test('unknown stored values fall back to defaults', () async {
+    final store = await _store({'theme': 'neon', 'language': 'xx'});
+    expect(store.themePreference, ThemePreference.system);
+    expect(store.language, AppLanguage.tr);
   });
 }

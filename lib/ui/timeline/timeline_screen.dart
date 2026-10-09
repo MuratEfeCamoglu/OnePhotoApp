@@ -1,12 +1,16 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
-import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
 import '../day_detail/day_detail_screen.dart';
 import '../widgets/add_photo_flow.dart';
 import '../widgets/error_snackbar.dart';
+import '../widgets/floating_nav_bar.dart';
+import '../widgets/l10n.dart';
+import '../widgets/motion.dart';
 import 'month_grid.dart';
 
 /// Home screen: months newest first with day photos (ISKELET F1).
@@ -21,7 +25,7 @@ class TimelineScreen extends StatefulWidget {
   /// Source of entries and actions.
   final TimelineController controller;
 
-  /// Builds the settings screen opened from the app bar.
+  /// Builds the settings screen opened from the bottom bar.
   final WidgetBuilder settingsBuilder;
 
   @override
@@ -29,6 +33,8 @@ class TimelineScreen extends StatefulWidget {
 }
 
 class _TimelineScreenState extends State<TimelineScreen> {
+  final _scroll = ScrollController();
+
   TimelineController get _controller => widget.controller;
 
   @override
@@ -40,6 +46,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   @override
   void dispose() {
     _controller.removeListener(_showPendingError);
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -53,7 +60,12 @@ class _TimelineScreenState extends State<TimelineScreen> {
         .push(MaterialPageRoute<void>(builder: widget.settingsBuilder));
   }
 
-  // The camera icon is always for today (ISKELET F3c).
+  void _scrollToTop() {
+    if (!_scroll.hasClients) return;
+    _scroll.animateTo(0, duration: AppMotion.long, curve: AppMotion.curve);
+  }
+
+  // The camera button is always for today (ISKELET F3c).
   void _onCameraPressed() {
     addPhotoFlow(
       context,
@@ -78,98 +90,204 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: AppDimens.gutter,
-        title: const Text(Strings.appTitle, style: AppText.appTitle),
-        actions: [
-          ListenableBuilder(
-            listenable: _controller,
-            builder: (context, _) => IconButton(
-              key: const ValueKey('camera-button'),
-              tooltip: Strings.cameraTooltip,
-              icon: const Icon(Icons.photo_camera),
-              onPressed: _controller.isLoading ? null : _onCameraPressed,
-            ),
-          ),
-          IconButton(
-            key: const ValueKey('settings-button'),
-            tooltip: Strings.settingsTooltip,
-            icon: const Icon(Icons.settings),
-            onPressed: _openSettings,
-          ),
-          const SizedBox(width: 8),
-        ],
-        bottom: const _WeekdayHeader(),
-      ),
+      extendBody: true,
       body: ListenableBuilder(
         listenable: _controller,
         builder: (context, _) {
-          if (_controller.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final months = _controller.months;
-          final today = _controller.todayKey;
-          final offset = _controller.isEmpty ? 1 : 0;
-          // Lazily built: only months near the viewport exist (ISKELET §5).
-          return ListView.builder(
-            padding: EdgeInsets.only(
-              bottom: 24 + MediaQuery.paddingOf(context).bottom,
+          final slivers = <Widget>[
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _HeaderDelegate(
+                topPadding: MediaQuery.paddingOf(context).top,
+                title: context.strings.appTitle,
+                subtitle: context.strings.appSubtitle,
+                weekdays: context.strings.weekdaysShort,
+                palette: p,
+              ),
             ),
-            itemCount: months.length + offset,
-            itemBuilder: (context, index) {
-              if (index < offset) {
-                return _EmptyCard(
-                  onTap: _controller.isLoading ? null : _onCameraPressed,
-                );
-              }
-              return MonthGrid(
-                month: months[index - offset],
-                todayKey: today,
-                photoFor: (key) {
-                  final entry = _controller.entryFor(key);
-                  return entry == null ? null : _controller.fileFor(entry);
+          ];
+          if (_controller.isLoading) {
+            slivers.add(
+              const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          } else {
+            final months = _controller.months;
+            final today = _controller.todayKey;
+            final offset = _controller.isEmpty ? 1 : 0;
+            // Lazily built: only months near the viewport exist (ISKELET §5).
+            slivers.add(
+              SliverList.builder(
+                itemCount: months.length + offset,
+                itemBuilder: (context, index) {
+                  final delay = Duration(milliseconds: 70 * math.min(index, 4));
+                  if (index < offset) {
+                    return EntranceAnimation(
+                      child: _EmptyCard(onTap: _onCameraPressed),
+                    );
+                  }
+                  final month = months[index - offset];
+                  return EntranceAnimation(
+                    key: ValueKey(month),
+                    delay: delay,
+                    child: MonthGrid(
+                      month: month,
+                      todayKey: today,
+                      photoFor: (key) {
+                        final entry = _controller.entryFor(key);
+                        return entry == null
+                            ? null
+                            : _controller.fileFor(entry);
+                      },
+                      onDayTap: _onDayTap,
+                    ),
+                  );
                 },
-                onDayTap: _onDayTap,
-              );
-            },
+              ),
+            );
+          }
+          slivers.add(
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height:
+                    AppDimens.navBarClearance +
+                    MediaQuery.paddingOf(context).bottom,
+              ),
+            ),
           );
+          return CustomScrollView(controller: _scroll, slivers: slivers);
         },
+      ),
+      bottomNavigationBar: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) => FloatingNavBar(
+          onHome: _scrollToTop,
+          onCamera: _controller.isLoading ? null : _onCameraPressed,
+          onSettings: _openSettings,
+        ),
       ),
     );
   }
 }
 
-class _WeekdayHeader extends StatelessWidget implements PreferredSizeWidget {
-  const _WeekdayHeader();
+/// Large title that shrinks on scroll, with the pinned weekday row.
+class _HeaderDelegate extends SliverPersistentHeaderDelegate {
+  _HeaderDelegate({
+    required this.topPadding,
+    required this.title,
+    required this.subtitle,
+    required this.weekdays,
+    required this.palette,
+  });
+
+  final double topPadding;
+  final String title;
+  final String subtitle;
+  final List<String> weekdays;
+  final AppPalette palette;
+
+  static const _weekdayHeight = 29.0;
+  static const _collapsed = 56.0;
+  static const _expanded = 104.0;
 
   @override
-  Size get preferredSize => const Size.fromHeight(29);
+  double get minExtent => topPadding + _collapsed + _weekdayHeight;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 29,
-      padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.outline)),
-      ),
-      child: Row(
-        children: [
-          for (final (i, name) in Strings.weekdaysShort.indexed) ...[
-            if (i > 0) const SizedBox(width: AppDimens.cellGap),
+  double get maxExtent => topPadding + _expanded + _weekdayHeight;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
+    final t = (shrinkOffset / (_expanded - _collapsed)).clamp(0.0, 1.0);
+    final titleSize = 32 - 10 * t;
+    return Material(
+      color: palette.background,
+      elevation: overlaps ? 0.5 : 0,
+      shadowColor: Colors.black26,
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Expanded(
-              child: Text(
-                name,
-                textAlign: TextAlign.center,
-                style: AppText.weekday,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.gutter,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppText.appTitle.copyWith(
+                        fontSize: titleSize,
+                        color: palette.onSurface,
+                      ),
+                    ),
+                    // Subtitle fades and folds away as the title shrinks.
+                    ClipRect(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        heightFactor: 1 - t,
+                        child: Opacity(
+                          opacity: (1 - t * 1.6).clamp(0.0, 1.0),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              subtitle,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: palette.dayMuted,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10 - 4 * t),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              height: _weekdayHeight,
+              padding: const EdgeInsets.symmetric(horizontal: AppDimens.gutter),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: palette.outline)),
+              ),
+              child: Row(
+                children: [
+                  for (final (i, name) in weekdays.indexed) ...[
+                    if (i > 0) const SizedBox(width: AppDimens.cellGap),
+                    Expanded(
+                      child: Text(
+                        name,
+                        textAlign: TextAlign.center,
+                        style: AppText.weekday.copyWith(
+                          color: palette.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
+
+  @override
+  bool shouldRebuild(_HeaderDelegate old) =>
+      old.topPadding != topPadding ||
+      old.title != title ||
+      old.subtitle != subtitle ||
+      old.palette != palette;
 }
 
 /// Dashed "add your first photo" card shown while there are no entries.
@@ -180,6 +298,7 @@ class _EmptyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
     final radius = BorderRadius.circular(AppDimens.cardRadius);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -188,36 +307,39 @@ class _EmptyCard extends StatelessWidget {
         AppDimens.gutter,
         0,
       ),
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: radius,
-        child: InkWell(
+      child: PressScale(
+        scale: 0.97,
+        child: Material(
+          color: p.surface,
           borderRadius: radius,
-          onTap: onTap,
-          child: CustomPaint(
-            painter: const _DashedBorderPainter(),
-            child: const SizedBox(
-              height: 120,
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: AppColors.onAccent,
-                    child: Icon(Icons.photo_camera, size: 24),
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    Strings.emptyTimeline,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.onSurface,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: onTap,
+            child: CustomPaint(
+              painter: _DashedBorderPainter(p.handle),
+              child: SizedBox(
+                height: 120,
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: p.accent,
+                      foregroundColor: p.onAccent,
+                      child: const Icon(Icons.photo_camera, size: 24),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      context.strings.emptyTimeline,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: p.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -229,7 +351,9 @@ class _EmptyCard extends StatelessWidget {
 
 /// 1.5px dashed rounded border; Flutter has no dashed BoxBorder.
 class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter();
+  const _DashedBorderPainter(this.color);
+
+  final Color color;
 
   static const _dash = 6.0;
   static const _gap = 4.0;
@@ -245,7 +369,7 @@ class _DashedBorderPainter extends CustomPainter {
         ),
       );
     final paint = Paint()
-      ..color = AppColors.handle
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     for (final metric in path.computeMetrics()) {
@@ -256,5 +380,6 @@ class _DashedBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DashedBorderPainter oldDelegate) => false;
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

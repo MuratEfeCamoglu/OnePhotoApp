@@ -42,7 +42,7 @@ void main() {
       tester,
       (c) => addPhotoFlow(c, h.controller, '2026-10-09', PhotoSource.camera),
     );
-    expect(find.text(Strings.replaceQuestion), findsNothing);
+    expect(find.text(Strings.tr.replaceQuestion), findsNothing);
     expect(h.controller.entryFor('2026-10-09'), isNotNull);
   });
 
@@ -56,8 +56,8 @@ void main() {
       tester,
       (c) => addPhotoFlow(c, h.controller, '2026-10-09', PhotoSource.camera),
     );
-    expect(find.text(Strings.replaceQuestion), findsOneWidget);
-    await tester.tap(find.text(Strings.cancel));
+    expect(find.text(Strings.tr.replaceQuestion), findsOneWidget);
+    await tester.tap(find.text(Strings.tr.cancel));
     await tester.pumpAndSettle();
 
     expect(h.picker.cameraCalls, 0);
@@ -74,7 +74,7 @@ void main() {
       tester,
       (c) => addPhotoFlow(c, h.controller, '2026-10-09', PhotoSource.camera),
     );
-    await tester.tap(find.text(Strings.replace));
+    await tester.tap(find.text(Strings.tr.replace));
     await tester.pumpAndSettle();
 
     final entry = h.repo.rows['2026-10-09']!;
@@ -125,7 +125,7 @@ void main() {
       (c) => chooseSourceAndAdd(c, h.controller, '2026-10-05'),
     );
     expect(find.text('5 Ekim 2026'), findsOneWidget);
-    await tester.tap(find.text(Strings.pickFromGallery));
+    await tester.tap(find.text(Strings.tr.pickFromGallery));
     await tester.pumpAndSettle();
     expect(h.controller.entryFor('2026-10-05'), isNotNull);
     expect(h.picker.galleryCalls, 1);
@@ -137,7 +137,7 @@ void main() {
       tester,
       (c) => chooseSourceAndAdd(c, h.controller, '2026-10-05'),
     );
-    await tester.tap(find.text(Strings.cancel));
+    await tester.tap(find.text(Strings.tr.cancel));
     await tester.pumpAndSettle();
     expect(h.picker.galleryCalls + h.picker.cameraCalls, 0);
   });

@@ -1,3 +1,5 @@
+import 'package:one_photo_app/services/settings_store.dart';
+import 'package:one_photo_app/core/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:one_photo_app/app.dart';
@@ -19,7 +21,12 @@ void main() {
     usePhoneSurface(tester);
     await tester.pumpWidget(
       OnePhotoApp(
-        home: SettingsScreen(reminders: h.reminders, onGenerateDemoData: demo),
+        appearance: h.appearance,
+        home: SettingsScreen(
+          reminders: h.reminders,
+          appearance: h.appearance,
+          onGenerateDemoData: demo,
+        ),
       ),
     );
   }
@@ -30,7 +37,7 @@ void main() {
 
   testWidgets('shows the storage notice (F6g)', (tester) async {
     await pumpSettings(tester);
-    expect(find.text(Strings.settingsTitle), findsOneWidget);
+    expect(find.text(Strings.tr.settingsTitle), findsOneWidget);
     expect(
       find.text(
         'Fotoğraflar sadece bu cihazda saklanır; uygulamayı silersen kaybolur.',
@@ -41,7 +48,7 @@ void main() {
 
   testWidgets('reminder is off at 20:00 by default (F7a)', (tester) async {
     await pumpSettings(tester);
-    expect(find.text(Strings.reminderTitle), findsOneWidget);
+    expect(find.text(Strings.tr.reminderTitle), findsOneWidget);
     expect(switchValue(tester), isFalse);
     expect(find.text('Saat: 20:00'), findsOneWidget);
   });
@@ -84,7 +91,7 @@ void main() {
     await pumpSettings(tester);
     await tester.tap(find.byKey(const ValueKey('reminder-switch')));
     await tester.pumpAndSettle();
-    expect(find.text(Strings.reminderFailed), findsOneWidget);
+    expect(find.text(Strings.tr.reminderFailed), findsOneWidget);
   });
 
   testWidgets('time picker is Turkish and stores the chosen time (F7g)', (
@@ -122,7 +129,7 @@ void main() {
 
   testWidgets('no demo tool without a generator', (tester) async {
     await pumpSettings(tester);
-    expect(find.text(Strings.demoDataButton), findsNothing);
+    expect(find.text(Strings.tr.demoDataButton), findsNothing);
   });
 
   testWidgets('demo tool (debug builds) reports success', (tester) async {
@@ -131,15 +138,62 @@ void main() {
     await tester.tap(find.text('365 günlük demo veri üret'));
     await tester.pumpAndSettle();
     expect(calls, 1);
-    expect(find.text(Strings.demoDataDone), findsOneWidget);
+    expect(find.text(Strings.tr.demoDataDone), findsOneWidget);
   });
 
   testWidgets('demo tool asks for a first photo when there is none', (
     tester,
   ) async {
     await pumpSettings(tester, demo: () async => null);
-    await tester.tap(find.text(Strings.demoDataButton));
+    await tester.tap(find.text(Strings.tr.demoDataButton));
     await tester.pumpAndSettle();
-    expect(find.text(Strings.demoDataNeedsEntry), findsOneWidget);
+    expect(find.text(Strings.tr.demoDataNeedsEntry), findsOneWidget);
+  });
+
+  testWidgets('theme choice switches the app to dark mode (F9)', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+    await tester.tap(find.text(Strings.tr.themeDark));
+    await tester.pumpAndSettle();
+    expect(h.appearance.themeMode, ThemeMode.dark);
+    expect(h.settings.themePreference, ThemePreference.dark);
+    final context = tester.element(find.byType(SettingsScreen));
+    expect(Theme.of(context).brightness, Brightness.dark);
+    expect(
+      Theme.of(context).scaffoldBackgroundColor,
+      AppPalette.dark.background,
+    );
+  });
+
+  testWidgets('language choice switches every text to English (F10)', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+    expect(find.text('Ayarlar'), findsOneWidget);
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Daily reminder'), findsOneWidget);
+    expect(find.text('Time: 20:00'), findsOneWidget);
+    expect(find.text('Ayarlar'), findsNothing);
+    expect(h.settings.language, AppLanguage.en);
+
+    await tester.tap(find.text('Türkçe'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ayarlar'), findsOneWidget);
+  });
+
+  testWidgets('selected choices reflect the stored settings', (tester) async {
+    await h.appearance.setThemePreference(ThemePreference.light);
+    await pumpSettings(tester);
+    final theme = tester.widget<SegmentedButton<ThemePreference>>(
+      find.byType(SegmentedButton<ThemePreference>),
+    );
+    expect(theme.selected, {ThemePreference.light});
+    final language = tester.widget<SegmentedButton<AppLanguage>>(
+      find.byType(SegmentedButton<AppLanguage>),
+    );
+    expect(language.selected, {AppLanguage.tr});
   });
 }

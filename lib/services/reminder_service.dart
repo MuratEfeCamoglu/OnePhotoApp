@@ -15,9 +15,9 @@ abstract interface class ReminderScheduler {
   /// Asks for notification permission; `true` when granted.
   Future<bool> requestPermission();
 
-  /// Schedules the daily notification at [minutes] after local midnight,
-  /// replacing any earlier schedule.
-  Future<void> scheduleDaily(int minutes);
+  /// Schedules the daily notification at [minutes] after local midnight
+  /// with texts from [strings], replacing any earlier schedule.
+  Future<void> scheduleDaily(int minutes, Strings strings);
 
   /// Cancels the daily notification.
   Future<void> cancel();
@@ -26,10 +26,22 @@ abstract interface class ReminderScheduler {
 /// Turns the reminder setting into scheduled notifications (ISKELET F7).
 class ReminderService {
   /// Creates the service on top of persisted [settings].
-  ReminderService({required this._settings, required this._scheduler});
+  ReminderService({
+    required this._settings,
+    required this._scheduler,
+    this._strings = Strings.tr,
+  });
 
   final SettingsStore _settings;
   final ReminderScheduler _scheduler;
+  Strings _strings;
+
+  /// Switches the notification language and reschedules if needed.
+  Future<void> setStrings(Strings strings) async {
+    if (identical(strings, _strings)) return;
+    _strings = strings;
+    await restore();
+  }
 
   /// Whether the reminder is on.
   bool get enabled => _settings.reminderEnabled;
@@ -40,7 +52,7 @@ class ReminderService {
   /// Re-applies a stored "on" setting at launch, e.g. after a time zone
   /// change; reboots are handled by the plugin's boot receiver.
   Future<void> restore() async {
-    if (enabled) await _scheduler.scheduleDaily(minutes);
+    if (enabled) await _scheduler.scheduleDaily(minutes, _strings);
   }
 
   /// Turns the reminder on; returns `false` (and stays off) when the
@@ -48,7 +60,7 @@ class ReminderService {
   Future<bool> enable() async {
     final granted = await _scheduler.requestPermission();
     await _settings.setReminderEnabled(granted);
-    if (granted) await _scheduler.scheduleDaily(minutes);
+    if (granted) await _scheduler.scheduleDaily(minutes, _strings);
     return granted;
   }
 
@@ -61,7 +73,7 @@ class ReminderService {
   /// Stores a new time and reschedules if the reminder is on.
   Future<void> setTime(int newMinutes) async {
     await _settings.setReminderMinutes(newMinutes);
-    if (enabled) await _scheduler.scheduleDaily(newMinutes);
+    if (enabled) await _scheduler.scheduleDaily(newMinutes, _strings);
   }
 }
 
@@ -133,7 +145,7 @@ class LocalNotificationScheduler implements ReminderScheduler {
   }
 
   @override
-  Future<void> scheduleDaily(int minutes) async {
+  Future<void> scheduleDaily(int minutes, Strings strings) async {
     await cancel();
     await _ready.future;
     final now = tz.TZDateTime.now(tz.local);
@@ -148,14 +160,14 @@ class LocalNotificationScheduler implements ReminderScheduler {
     if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
     await _plugin.zonedSchedule(
       id: _notificationId,
-      title: Strings.reminderNotificationTitle,
-      body: Strings.reminderNotificationBody,
+      title: strings.reminderNotificationTitle,
+      body: strings.reminderNotificationBody,
       scheduledDate: at,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
-          Strings.reminderChannelName,
-          channelDescription: Strings.reminderChannelDescription,
+          strings.reminderChannelName,
+          channelDescription: strings.reminderChannelDescription,
         ),
         iOS: DarwinNotificationDetails(),
       ),

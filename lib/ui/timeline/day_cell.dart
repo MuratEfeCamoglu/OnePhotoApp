@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
+import '../widgets/motion.dart';
 
 /// Hero tag shared by a day's grid thumbnail and its detail photo.
 String photoHeroTag(String dateKey) => 'photo-$dateKey';
@@ -47,26 +48,29 @@ class DayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
     final radius = BorderRadius.circular(AppDimens.cellRadius);
     final missing = isMissing;
     final Widget content;
     if (photo != null && !missing) {
       content = _PhotoContent(
+        key: ValueKey(photo!.path),
         file: photo!,
         day: day,
         bold: isToday,
         heroTag: heroTag,
       );
     } else if (missing) {
-      content = _MissingContent(day: day);
+      content = _MissingContent(key: const ValueKey('missing'), day: day);
     } else {
       content = Center(
+        key: const ValueKey('empty'),
         child: Text(
           '$day',
           style: TextStyle(
             fontSize: 13,
             fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
-            color: isToday ? AppColors.accent : AppColors.dayMuted,
+            color: isToday ? p.accent : p.dayMuted,
           ),
         ),
       );
@@ -76,9 +80,26 @@ class DayCell extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         borderRadius: radius,
-        hoverColor: AppColors.surface,
+        hoverColor: p.surface,
         onTap: isFuture ? null : onTap,
-        child: ClipRRect(borderRadius: radius, child: content),
+        child: ClipRRect(
+          borderRadius: radius,
+          // A new or replaced photo pops in instead of just appearing.
+          child: AnimatedSwitcher(
+            duration: AppMotion.medium,
+            switchInCurve: Curves.easeOutBack,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween(begin: 0.8, end: 1.0).animate(animation),
+                child: child,
+              ),
+            ),
+            layoutBuilder: (current, previous) =>
+                Stack(fit: StackFit.expand, children: [...previous, ?current]),
+            child: content,
+          ),
+        ),
       ),
     );
     if (isToday) {
@@ -98,7 +119,7 @@ class DayCell extends StatelessWidget {
                 key: const ValueKey('today-ring'),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppDimens.cellRadius + 3),
-                  border: Border.all(color: AppColors.accent, width: 2),
+                  border: Border.all(color: p.accent, width: 2),
                 ),
               ),
             ),
@@ -110,7 +131,7 @@ class DayCell extends StatelessWidget {
       label: label,
       button: !isFuture,
       selected: isToday,
-      child: cell,
+      child: PressScale(enabled: !isFuture, child: cell),
     );
     if (isFuture) {
       cell = IgnorePointer(
@@ -123,6 +144,7 @@ class DayCell extends StatelessWidget {
 
 class _PhotoContent extends StatelessWidget {
   const _PhotoContent({
+    super.key,
     required this.file,
     required this.day,
     required this.bold,
@@ -155,7 +177,7 @@ class _PhotoContent extends StatelessWidget {
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
     return ColoredBox(
-      color: AppColors.surface,
+      color: context.palette.surface,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -198,24 +220,21 @@ class _PhotoContent extends StatelessWidget {
 }
 
 class _MissingContent extends StatelessWidget {
-  const _MissingContent({required this.day});
+  const _MissingContent({super.key, required this.day});
 
   final int day;
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
     return ColoredBox(
-      color: AppColors.surface,
+      color: p.surface,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const Align(
-            alignment: Alignment(0, -0.35),
-            child: Icon(
-              Icons.broken_image,
-              size: 18,
-              color: AppColors.dayMuted,
-            ),
+          Align(
+            alignment: const Alignment(0, -0.35),
+            child: Icon(Icons.broken_image, size: 18, color: p.dayMuted),
           ),
           Positioned(
             left: 0,
@@ -224,10 +243,10 @@ class _MissingContent extends StatelessWidget {
             child: Text(
               '$day',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: AppColors.dayMuted,
+                color: p.dayMuted,
               ),
             ),
           ),

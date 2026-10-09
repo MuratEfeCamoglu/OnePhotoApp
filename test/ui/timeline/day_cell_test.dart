@@ -26,7 +26,7 @@ void main() {
     expect(find.text('7'), findsOneWidget);
     expect(find.byType(Image), findsNothing);
     final text = tester.widget<Text>(find.text('7'));
-    expect(text.style!.color, AppColors.dayMuted);
+    expect(text.style!.color, AppPalette.light.dayMuted);
   });
 
   testWidgets('photo day decodes a 200px thumbnail with its number', (
@@ -104,12 +104,12 @@ void main() {
     final ring = find.byKey(const ValueKey('today-ring'));
     final box = tester.widget<DecoratedBox>(ring);
     final decoration = box.decoration as BoxDecoration;
-    expect((decoration.border! as Border).top.color, AppColors.accent);
+    expect((decoration.border! as Border).top.color, AppPalette.light.accent);
     expect((decoration.border! as Border).top.width, 2);
     // 48px cell + 3px on each side (2px ring, 1px offset as in the mockup).
     expect(tester.getSize(ring), const Size(54, 54));
     final text = tester.widget<Text>(find.text('9'));
-    expect(text.style!.color, AppColors.accent);
+    expect(text.style!.color, AppPalette.light.accent);
     expect(text.style!.fontWeight, FontWeight.w700);
   });
 

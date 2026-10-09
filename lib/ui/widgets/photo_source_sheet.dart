@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../services/photo_picker.dart';
+import 'l10n.dart';
 
 /// Opens the "Fotoğraf çek / Galeriden seç / Vazgeç" sheet (ISKELET F3a).
 ///
@@ -28,6 +28,8 @@ class PhotoSourceSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navigator = Navigator.of(context);
+    final p = context.palette;
+    final s = context.strings;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(top: 12, bottom: 8),
@@ -41,7 +43,7 @@ class PhotoSourceSheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.handle,
+                  color: p.handle,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -51,21 +53,21 @@ class PhotoSourceSheet extends StatelessWidget {
               child: Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.onSurface,
+                  color: p.onSurface,
                 ),
               ),
             ),
             _SourceTile(
               icon: Icons.photo_camera,
-              label: Strings.takePhoto,
+              label: s.takePhoto,
               onTap: () => navigator.pop(PhotoSource.camera),
             ),
             _SourceTile(
               icon: Icons.photo_library,
-              label: Strings.pickFromGallery,
+              label: s.pickFromGallery,
               onTap: () => navigator.pop(PhotoSource.gallery),
             ),
             const SizedBox(height: 8),
@@ -80,7 +82,7 @@ class PhotoSourceSheet extends StatelessWidget {
                   ),
                 ),
                 onPressed: () => navigator.pop(),
-                child: const Text(Strings.cancel),
+                child: Text(s.cancel),
               ),
             ),
           ],
@@ -111,9 +113,12 @@ class _SourceTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
             children: [
-              Icon(icon, size: 24, color: AppColors.onSurfaceVariant),
+              Icon(icon, size: 24, color: context.palette.onSurfaceVariant),
               const SizedBox(width: 16),
-              Text(label, style: AppText.body),
+              Text(
+                label,
+                style: AppText.body.copyWith(color: context.palette.onSurface),
+              ),
             ],
           ),
         ),

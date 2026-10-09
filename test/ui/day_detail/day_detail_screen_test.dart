@@ -55,13 +55,13 @@ void main() {
     h = await TestHarness.create(photoDays: ['2026-10-09']);
     await openDetail(tester, '2026-10-09');
 
-    await tester.tap(find.text(Strings.delete));
+    await tester.tap(find.text(Strings.tr.delete));
     await tester.pumpAndSettle();
-    expect(find.text(Strings.deleteQuestion), findsOneWidget);
+    expect(find.text(Strings.tr.deleteQuestion), findsOneWidget);
     await tester.tap(
       find.descendant(
         of: find.byType(AlertDialog),
-        matching: find.text(Strings.delete),
+        matching: find.text(Strings.tr.delete),
       ),
     );
     await tester.pumpAndSettle();
@@ -82,9 +82,9 @@ void main() {
   testWidgets('cancelling delete keeps everything', (tester) async {
     h = await TestHarness.create(photoDays: ['2026-10-09']);
     await openDetail(tester, '2026-10-09');
-    await tester.tap(find.text(Strings.delete));
+    await tester.tap(find.text(Strings.tr.delete));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Strings.cancel));
+    await tester.tap(find.text(Strings.tr.cancel));
     await tester.pumpAndSettle();
     expect(h.repo.rows, hasLength(1));
     expect(find.byType(DayDetailScreen), findsOneWidget);
@@ -97,15 +97,15 @@ void main() {
     h.picker.galleryResult = writeSourcePhoto(h.root);
     await openDetail(tester, '2026-10-05');
 
-    await tester.tap(find.text(Strings.replace));
+    await tester.tap(find.text(Strings.tr.replace));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Strings.pickFromGallery));
+    await tester.tap(find.text(Strings.tr.pickFromGallery));
     await tester.pumpAndSettle();
-    expect(find.text(Strings.replaceQuestion), findsOneWidget);
+    expect(find.text(Strings.tr.replaceQuestion), findsOneWidget);
     await tester.tap(
       find.descendant(
         of: find.byType(AlertDialog),
-        matching: find.text(Strings.replace),
+        matching: find.text(Strings.tr.replace),
       ),
     );
     await tester.pumpAndSettle();

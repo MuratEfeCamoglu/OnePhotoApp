@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
-const _locale = 'tr_TR';
+import 'strings.dart';
+
 final _keyPattern = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
 
 /// Day key (`YYYY-MM-DD`) of [time] in the device's local time zone.
@@ -29,14 +30,17 @@ DateTime parseDateKey(String key) {
   return date;
 }
 
-/// Month header such as "Ocak 2026".
-String formatMonthTitle(int year, int month) =>
-    DateFormat('MMMM y', _locale).format(DateTime(year, month));
+DateFormat _format(String pattern, Strings strings) =>
+    DateFormat(pattern, strings.language.localeName);
+
+/// Month header such as "Ocak 2026" / "October 2026".
+String formatMonthTitle(int year, int month, {Strings strings = Strings.tr}) =>
+    _format(strings.monthPattern, strings).format(DateTime(year, month));
 
 /// Detail title such as "9 Ekim 2026, Cuma".
-String formatLongDate(String key) =>
-    DateFormat('d MMMM y, EEEE', _locale).format(parseDateKey(key));
+String formatLongDate(String key, {Strings strings = Strings.tr}) =>
+    _format(strings.longDatePattern, strings).format(parseDateKey(key));
 
 /// Sheet title such as "9 Ekim 2026".
-String formatShortDate(String key) =>
-    DateFormat('d MMMM y', _locale).format(parseDateKey(key));
+String formatShortDate(String key, {Strings strings = Strings.tr}) =>
+    _format(strings.shortDatePattern, strings).format(parseDateKey(key));

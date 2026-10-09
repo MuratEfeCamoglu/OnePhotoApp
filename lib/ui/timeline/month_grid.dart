@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/calendar.dart';
 import '../../core/date_key.dart';
+import '../../core/strings.dart';
 import '../../core/theme.dart';
+import '../widgets/l10n.dart';
 import 'day_cell.dart';
 
 /// Title plus Monday-first 7 column grid for one month (ISKELET F1c–e).
@@ -32,6 +34,7 @@ class MonthGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppDimens.gutter,
@@ -45,8 +48,8 @@ class MonthGrid extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              formatMonthTitle(month.year, month.month),
-              style: AppText.month,
+              formatMonthTitle(month.year, month.month, strings: strings),
+              style: AppText.month.copyWith(color: context.palette.onSurface),
             ),
           ),
           GridView.count(
@@ -60,7 +63,10 @@ class MonthGrid extends StatelessWidget {
             crossAxisSpacing: AppDimens.cellGap,
             children: [
               for (final day in monthCells(month.year, month.month))
-                if (day == null) const SizedBox.shrink() else _cell(day),
+                if (day == null)
+                  const SizedBox.shrink()
+                else
+                  _cell(day, strings),
             ],
           ),
         ],
@@ -68,7 +74,7 @@ class MonthGrid extends StatelessWidget {
     );
   }
 
-  Widget _cell(int day) {
+  Widget _cell(int day, Strings strings) {
     final key = dateKeyOf(DateTime(month.year, month.month, day));
     // Day keys sort chronologically as plain strings.
     final compare = key.compareTo(todayKey);
@@ -76,7 +82,7 @@ class MonthGrid extends StatelessWidget {
     return DayCell(
       key: ValueKey('day-$key'),
       day: day,
-      label: formatShortDate(key),
+      label: formatShortDate(key, strings: strings),
       isToday: compare == 0,
       isFuture: compare > 0,
       photo: photo,

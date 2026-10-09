@@ -23,10 +23,15 @@ Future<void> pumpTimeline(
   usePhoneSurface(tester);
   await tester.pumpWidget(
     OnePhotoApp(
+      appearance: h.appearance,
       home: TimelineScreen(
         controller: h.controller,
         settingsBuilder:
-            settingsBuilder ?? (_) => SettingsScreen(reminders: h.reminders),
+            settingsBuilder ??
+            (_) => SettingsScreen(
+              reminders: h.reminders,
+              appearance: h.appearance,
+            ),
       ),
     ),
   );

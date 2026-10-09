@@ -1,5 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/strings.dart';
+
+/// Light/dark choice; `system` follows the device (ISKELET F9).
+enum ThemePreference { system, light, dark }
+
 /// Typed access to the app's shared_preferences keys (ISKELET §3).
 class SettingsStore {
   /// Wraps an initialised [SharedPreferences].
@@ -11,6 +16,8 @@ class SettingsStore {
   static const _reminderEnabled = 'reminder_enabled';
   static const _reminderMinutes = 'reminder_minutes';
   static const _pendingDateKey = 'pending_date_key';
+  static const _theme = 'theme';
+  static const _language = 'language';
 
   final SharedPreferences _prefs;
 
@@ -36,4 +43,21 @@ class SettingsStore {
   Future<void> setPendingDateKey(String? dateKey) => dateKey == null
       ? _prefs.remove(_pendingDateKey)
       : _prefs.setString(_pendingDateKey, dateKey);
+
+  /// Theme choice; follows the system by default.
+  ThemePreference get themePreference => ThemePreference.values.firstWhere(
+    (t) => t.name == _prefs.getString(_theme),
+    orElse: () => ThemePreference.system,
+  );
+
+  /// Persists [value] for [themePreference].
+  Future<void> setThemePreference(ThemePreference value) =>
+      _prefs.setString(_theme, value.name);
+
+  /// UI language; Turkish by default.
+  AppLanguage get language => AppLanguage.fromCode(_prefs.getString(_language));
+
+  /// Persists [value] for [language].
+  Future<void> setLanguage(AppLanguage value) =>
+      _prefs.setString(_language, value.code);
 }

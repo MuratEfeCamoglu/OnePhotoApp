@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../core/date_key.dart';
-import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../data/entry.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
 import 'error_snackbar.dart';
+import 'l10n.dart';
 import 'photo_source_sheet.dart';
 
 /// Shows a yes/no dialog; resolves to `true` only on the confirm button.
@@ -18,13 +18,16 @@ Future<bool> confirmAction(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(question, style: AppText.headline),
+      title: Text(
+        question,
+        style: AppText.headline.copyWith(color: context.palette.onSurface),
+      ),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       actionsPadding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text(Strings.cancel),
+          child: Text(context.strings.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
@@ -49,8 +52,8 @@ Future<Entry?> addPhotoFlow(
   if (controller.entryFor(dateKey) != null) {
     final replace = await confirmAction(
       context,
-      question: Strings.replaceQuestion,
-      confirmLabel: Strings.replace,
+      question: context.strings.replaceQuestion,
+      confirmLabel: context.strings.replace,
     );
     if (!replace || !context.mounted) return null;
   }
@@ -70,7 +73,7 @@ Future<Entry?> chooseSourceAndAdd(
 ) async {
   final source = await showPhotoSourceSheet(
     context,
-    title: formatShortDate(dateKey),
+    title: formatShortDate(dateKey, strings: context.strings),
   );
   if (source == null || !context.mounted) return null;
   return addPhotoFlow(context, controller, dateKey, source);

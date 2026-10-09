@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:one_photo_app/core/errors.dart';
+import 'package:one_photo_app/core/strings.dart';
 import 'package:one_photo_app/data/entry.dart';
 import 'package:one_photo_app/data/entry_repository.dart';
 import 'package:one_photo_app/data/photo_storage.dart';
@@ -8,6 +9,7 @@ import 'package:one_photo_app/services/photo_picker.dart';
 import 'package:one_photo_app/services/photo_service.dart';
 import 'package:one_photo_app/services/reminder_service.dart';
 import 'package:one_photo_app/services/settings_store.dart';
+import 'package:one_photo_app/state/appearance_controller.dart';
 import 'package:one_photo_app/state/timeline_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -165,6 +167,11 @@ class TestHarness {
     scheduler: scheduler,
   );
 
+  late final AppearanceController appearance = AppearanceController(
+    settings: settings,
+    reminders: reminders,
+  );
+
   void dispose() => root.deleteSync(recursive: true);
 }
 
@@ -173,6 +180,7 @@ class FakeReminderScheduler implements ReminderScheduler {
   bool grant = true;
   Exception? error;
   int? scheduledMinutes;
+  Strings? scheduledStrings;
   int permissionRequests = 0;
   int cancels = 0;
 
@@ -183,9 +191,10 @@ class FakeReminderScheduler implements ReminderScheduler {
   }
 
   @override
-  Future<void> scheduleDaily(int minutes) async {
+  Future<void> scheduleDaily(int minutes, Strings strings) async {
     if (error != null) throw error!;
     scheduledMinutes = minutes;
+    scheduledStrings = strings;
   }
 
   @override

@@ -36,9 +36,9 @@ void main() {
   });
 
   for (final (label, expected) in [
-    (Strings.takePhoto, PhotoSource.camera),
-    (Strings.pickFromGallery, PhotoSource.gallery),
-    (Strings.cancel, null),
+    (Strings.tr.takePhoto, PhotoSource.camera),
+    (Strings.tr.pickFromGallery, PhotoSource.gallery),
+    (Strings.tr.cancel, null),
   ]) {
     testWidgets('"$label" resolves to $expected', (tester) async {
       final results = await pumpOpener(tester);

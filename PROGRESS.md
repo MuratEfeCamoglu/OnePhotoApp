@@ -148,3 +148,14 @@ Doğrulama: format ✅, analyze ✅, 141/141 test ✅.
 - iOS: `AppIcon.appiconset` içindeki 15 PNG, opak ve tam kare (köşe maskesini iOS uygular).
 - Paket eklenmedi; PNG'ler geliştirme makinesinde Pillow betiğiyle üretildi (V18).
 - Release APK derlendi ve telefona kuruldu; simge uygulama çekmecesinde doğrulandı.
+
+## Modern görünüm, koyu tema (F9), dil (F10)
+Referans: kullanıcının eklediği "One Photo / Day App" ekran görüntüsü (alt yüzen gezinme çubuğu).
+- **Alt gezinme:** buzlu cam efektli (blur) yüzen hap çubuk: ana sayfa (en üste kaydırır) / gradyanlı kamera (bugün) / ayarlar. `ui/widgets/floating_nav_bar.dart`.
+- **Başlık:** büyük "OnePhoto" + slogan, kaydırınca 32→22 px küçülür, slogan katlanarak kaybolur; hafta günü satırı sabit (`SliverPersistentHeader`).
+- **Animasyonlar:** ayların ve ayar bölümlerinin sırayla belirmesi (`EntranceAnimation`, zamanlayıcısız), basınca küçülme (`PressScale`), yeni/değişen fotoğrafın hücrede ölçekli belirmesi (`AnimatedSwitcher`), küçük resimlerin yumuşak yüklenmesi, hücre→detay Hero, Android'de zoom sayfa geçişi, tema değişiminde renk geçişi.
+- **Koyu tema (F9):** `AppPalette` ThemeExtension (açık = mockup, koyu karşılığı); Ayarlar > Görünüm: Sistem / Açık / Koyu; `shared_preferences` `theme`.
+- **Dil (F10):** `Strings` artık dile göre (Türkçe/English), `StringsDelegate` + `context.strings`; ay/gün adları ve tarih biçimi `intl` ile dile göre; Material diyalogları (saat seçici) dile göre; açık hatırlatma bildirimi dil değişince yeni dilde yeniden kurulur. `shared_preferences` `language`.
+- Yeni dosyalar: `state/appearance_controller.dart`, `ui/widgets/l10n.dart`, `ui/widgets/motion.dart`, `ui/widgets/floating_nav_bar.dart` (+ testleri), `test/core/strings_test.dart`.
+- ISKELET: F1g güncellendi, F9 ve F10 eklendi, V19–V20.
+Doğrulama: format ✅, analyze ✅, 173/173 test ✅, `flutter build apk --release` ✅, telefona kuruldu. Cihazda ekran kontrolü: telefon kilitli olduğu için bekliyor.

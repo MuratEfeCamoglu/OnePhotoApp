@@ -1,3 +1,4 @@
+import 'package:one_photo_app/core/strings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:one_photo_app/core/date_key.dart';
@@ -69,6 +70,22 @@ void main() {
 
     test('short date has no weekday', () {
       expect(formatShortDate('2026-10-05'), '5 Ekim 2026');
+    });
+  });
+
+  group('English formatting', () {
+    setUpAll(() => initializeDateFormatting('en_US'));
+
+    test('month title and dates use English names', () {
+      expect(formatMonthTitle(2026, 10, strings: Strings.en), 'October 2026');
+      expect(
+        formatLongDate('2026-10-09', strings: Strings.en),
+        'Friday, October 9, 2026',
+      );
+      expect(
+        formatShortDate('2026-10-05', strings: Strings.en),
+        'October 5, 2026',
+      );
     });
   });
 }

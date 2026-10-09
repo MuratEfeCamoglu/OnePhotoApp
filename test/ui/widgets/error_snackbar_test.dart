@@ -8,14 +8,17 @@ void main() {
   test('maps errors to the F8 messages', () {
     expect(
       errorMessage(const PermissionDeniedException(PermissionKind.camera)),
-      Strings.cameraPermissionDenied,
+      Strings.tr.cameraPermissionDenied,
     );
     expect(
       errorMessage(const PermissionDeniedException(PermissionKind.photos)),
-      Strings.photosPermissionDenied,
+      Strings.tr.photosPermissionDenied,
     );
-    expect(errorMessage(const PhotoSaveException()), Strings.photoSaveFailed);
-    expect(errorMessage(Exception('x')), Strings.photoSaveFailed);
+    expect(
+      errorMessage(const PhotoSaveException()),
+      Strings.tr.photoSaveFailed,
+    );
+    expect(errorMessage(Exception('x')), Strings.tr.photoSaveFailed);
   });
 
   testWidgets('shows the message in a SnackBar', (tester) async {
@@ -36,6 +39,6 @@ void main() {
     );
     await tester.tap(find.text('go'));
     await tester.pump();
-    expect(find.text(Strings.cameraPermissionDenied), findsOneWidget);
+    expect(find.text(Strings.tr.cameraPermissionDenied), findsOneWidget);
   });
 }

@@ -15,6 +15,8 @@ import 'services/photo_picker.dart';
 import 'services/photo_service.dart';
 import 'services/reminder_service.dart';
 import 'services/settings_store.dart';
+import 'core/strings.dart';
+import 'state/appearance_controller.dart';
 import 'state/timeline_controller.dart';
 import 'ui/settings/settings_screen.dart';
 import 'ui/timeline/timeline_screen.dart';
@@ -23,6 +25,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await initializeDateFormatting('tr_TR');
+  await initializeDateFormatting('en_US');
 
   final settings = SettingsStore(await SharedPreferences.getInstance());
   final repository = await SqfliteEntryRepository.open(
@@ -42,15 +45,25 @@ Future<void> main() async {
 
   final navigatorKey = GlobalKey<NavigatorState>();
   final scheduler = LocalNotificationScheduler();
-  final reminders = ReminderService(settings: settings, scheduler: scheduler);
+  final reminders = ReminderService(
+    settings: settings,
+    scheduler: scheduler,
+    strings: Strings.of(settings.language),
+  );
+  final appearance = AppearanceController(
+    settings: settings,
+    reminders: reminders,
+  );
 
   runApp(
     OnePhotoApp(
       navigatorKey: navigatorKey,
+      appearance: appearance,
       home: TimelineScreen(
         controller: controller,
         settingsBuilder: (_) => SettingsScreen(
           reminders: reminders,
+          appearance: appearance,
           onGenerateDemoData: controller.generateDemoData,
         ),
       ),
