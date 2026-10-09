@@ -141,3 +141,10 @@ Mockup baştan sona okunup ekran ekran karşılaştırıldı; farklar düzeltild
 Cihazda (Poco X3, yeni profile APK) ekran görüntüleriyle doğrulandı: zaman çizelgesi, alt sayfa, detay, değiştirme diyaloğu, ayarlar. Boş durum kartı cihazda görülmedi (veri dolu); widget testiyle kapsandı.
 365 kayıtla soğuk açılış (yeni APK): 1061/1047/1195/1045/1134 ms.
 Doğrulama: format ✅, analyze ✅, 141/141 test ✅.
+
+## Uygulama simgesi
+- Yeni simge: turuncu (`#C2410C` → `#9A3412`) gradyan zemin, yarı saydam 3×3 takvim hücreleri, ortada beyaz "bugün" hücresi içinde güneş + dağ fotoğraf motifi.
+- Android: `mipmap-*/ic_launcher.png` (API 24–25, yuvarlatılmış kare), adaptif simge `mipmap-anydpi-v26/ic_launcher.xml` = gradyan `drawable/ic_launcher_background.xml` + `mipmap-*/ic_launcher_foreground.png` (motif 66dp güvenli alanın içinde).
+- iOS: `AppIcon.appiconset` içindeki 15 PNG, opak ve tam kare (köşe maskesini iOS uygular).
+- Paket eklenmedi; PNG'ler geliştirme makinesinde Pillow betiğiyle üretildi (V18).
+- Release APK derlendi ve telefona kuruldu; simge uygulama çekmecesinde doğrulandı.

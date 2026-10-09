@@ -202,3 +202,4 @@ Toplam tahmin: ~10 gün (6–12 gün aralığında).
 - **V15 — Şablon paketi:** `flutter create`'in eklediği `cupertino_icons` onaylı listede olmadığı için kaldırıldı; uygulama yalnızca Material ikonları kullanır.
 - **V16 — Yön kilidi:** Dikey yön `SystemChrome.setPreferredOrientations` ile kilitlenir; iOS `Info.plist` telefon yönleri yalnızca `Portrait` olarak bırakıldı.
 - **V17 — Değiştirme onayının zamanı:** F4(b) onayı, picker açılmadan önce sorulur (kamera ikonu: onay → kamera; hücre/detay "Değiştir": seçenek sayfası → onay → picker). "Vazgeç" seçildiğinde hiç fotoğraf alınmaz, dosya oluşmaz.
+- **V18 — Uygulama simgesi:** Onaylı listede simge üreten paket olmadığı için simgeler (Android eski tip + adaptif, iOS AppIcon seti) elle üretilip depoya PNG olarak eklendi. Tasarım: vurgu rengi `#C2410C` gradyan zemin, 3×3 takvim ızgarası, ortadaki "bugün" hücresinde fotoğraf motifi.
