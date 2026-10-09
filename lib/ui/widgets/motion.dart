@@ -96,11 +96,7 @@ class _EntranceAnimationState extends State<EntranceAnimation>
       parent: _controller,
       curve: Interval(start, 1, curve: AppMotion.curve),
     );
-    if (widget.enabled) {
-      _controller.forward().whenComplete(() {
-        if (mounted) setState(() {});
-      });
-    }
+    if (widget.enabled) _controller.forward();
   }
 
   @override
@@ -111,18 +107,19 @@ class _EntranceAnimationState extends State<EntranceAnimation>
 
   @override
   Widget build(BuildContext context) {
-    // Finished animations add no layers, so scrolling stays cheap.
-    if (_controller.isCompleted) return widget.child;
-    return AnimatedBuilder(
-      animation: _t,
-      builder: (context, child) => Opacity(
-        opacity: _t.value,
-        child: Transform.translate(
+    // The tree shape never changes, so finishing does not rebuild the child.
+    // At full opacity FadeTransition paints without a layer, and a zero
+    // translation paints in place: a finished entrance costs nothing.
+    return FadeTransition(
+      opacity: _t,
+      child: AnimatedBuilder(
+        animation: _t,
+        builder: (context, child) => Transform.translate(
           offset: Offset(0, widget.offset * (1 - _t.value)),
           child: child,
         ),
+        child: widget.child,
       ),
-      child: widget.child,
     );
   }
 }

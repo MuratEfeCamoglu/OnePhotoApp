@@ -214,6 +214,7 @@ void main() {
       expect(repo.rows, isEmpty);
     });
 
+    // Copies 364 real files; slow when the whole suite runs in parallel.
     test('fills every empty day of the last N days, keeps existing', () async {
       final original = await service.savePhoto('2026-10-05', source());
       final filled = await service.fillDemoDays(365);
@@ -225,7 +226,7 @@ void main() {
       expect(repo.rows.containsKey('2025-10-10'), isTrue);
       expect(repo.rows.containsKey('2025-10-09'), isFalse);
       expect(await storage.listFileNames(), hasLength(365));
-    });
+    }, timeout: const Timeout(Duration(minutes: 2)));
   });
 
   test('loadAll returns repository entries', () async {

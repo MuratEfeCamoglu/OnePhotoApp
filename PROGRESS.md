@@ -204,3 +204,10 @@ Nedenler ve düzeltmeler: alt çubuktaki `BackdropFilter` her karede kaydırıla
 
 **Play Store:** paket kimliği `com.onephotoapp.android` / iOS `com.onephotoapp.ios` (V24); `key.properties` ile yükleme anahtarı imzası; tek renkli bildirim simgesi (`ic_stat_onephoto`); bulut yedeği kapalı, cihazdan cihaza aktarım açık (V25); pubspec açıklaması; belgelerdeki kişisel bilgiler (eski kimlik, cihaz modeli, emülatör adı) temizlendi. `docs/play-store/`: 512 simge, 1024×500 öne çıkan grafik (TR/EN), 6+6 adet 1080×2160 ekran görüntüsü (örnek görsellerle), mağaza metinleri, veri güvenliği yanıtları; `docs/privacy-policy.md` (TR/EN, iletişim e-postası yer tutucu).
 Doğrulama: format ✅, analyze ✅, 243/243 test ✅, `flutter build appbundle --release` ✅, release manifestinde `INTERNET` yok ✅.
+
+## Açılış animasyonu (V26)
+- Android: turuncu (`#C2410C`) sistem splash'ı ve ızgara (Android 12+ `values-v31`, öncesi `launch_background.xml`, ikisi de 288 dp kutu); iOS LaunchScreen zemini aynı renk.
+- Flutter `SplashGate`: aynı resimle başlar, `waitFor` (veri yükleme) bitene ve ana ekran perdenin arkasında bir kez çizilene kadar sabit bekler; sonra 0,95 sn: kareler çapraz dalga, ortadaki "bugün" karesi, "OnePhoto" yazısı, perde büyüyerek kaybolur. Saydamlık renklere uygulanır (tam ekran katman yok); animasyon sırasında ana ekran çizilmez; dokunma atlatır; azaltılmış hareket ayarında oynamaz.
+- Cihaz ölçümü (profile, soğuk açılış ×3): ağır kareler yalnızca sabit bekleme aşamasında; animasyon boyunca en fazla tek bir 20–24 ms kare (perde kalkarken), çoğu açılışta hiç yok.
+- Bulunan ve düzeltilen hatalar: animasyon bitince ana ekranın sıfırdan yeniden oluşturulması; `EntranceAnimation` bitince ay ızgarasının yeniden oluşturulması (yapı sabitlendi); `Material` dışındaki başlığın sarı alt çizgili yedek stile düşmesi.
+Doğrulama: format ✅, analyze ✅, 253/253 test ✅.

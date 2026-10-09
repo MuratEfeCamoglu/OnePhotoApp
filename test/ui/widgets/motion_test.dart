@@ -63,21 +63,37 @@ void main() {
       ),
     );
     double opacity() => tester
-        .widget<Opacity>(
-          find.ancestor(of: find.text('hi'), matching: find.byType(Opacity)),
+        .widget<FadeTransition>(
+          find
+              .ancestor(
+                of: find.text('hi'),
+                matching: find.byType(FadeTransition),
+              )
+              .first,
         )
-        .opacity;
+        .opacity
+        .value;
     expect(opacity(), 0);
     await tester.pump(const Duration(milliseconds: 50));
     expect(opacity(), 0, reason: 'still inside the delay');
     await tester.pump(const Duration(milliseconds: 300));
     expect(opacity(), greaterThan(0));
     await tester.pumpAndSettle();
-    // Once finished the wrapper adds no layers at all.
-    expect(
-      find.ancestor(of: find.text('hi'), matching: find.byType(Opacity)),
-      findsNothing,
+    expect(opacity(), 1);
+  });
+
+  testWidgets('finishing does not rebuild the child from scratch', (
+    tester,
+  ) async {
+    final key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EntranceAnimation(child: SizedBox(key: key)),
+      ),
     );
+    final before = key.currentContext;
+    await tester.pumpAndSettle();
+    expect(key.currentContext, same(before));
   });
 
   testWidgets('disabled EntranceAnimation shows the child at once', (
@@ -90,8 +106,18 @@ void main() {
     );
     expect(find.text('now'), findsOneWidget);
     expect(
-      find.ancestor(of: find.text('now'), matching: find.byType(Opacity)),
-      findsNothing,
+      tester
+          .widget<FadeTransition>(
+            find
+                .ancestor(
+                  of: find.text('now'),
+                  matching: find.byType(FadeTransition),
+                )
+                .first,
+          )
+          .opacity
+          .value,
+      1,
     );
     expect(tester.hasRunningAnimations, isFalse);
   });

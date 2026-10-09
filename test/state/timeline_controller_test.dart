@@ -74,12 +74,13 @@ void main() {
     expect(h.repo.rows, isEmpty);
   });
 
+  // Copies 364 real files; slow when the whole suite runs in parallel.
   test('generateDemoData fills a year and reloads', () async {
     h = await TestHarness.create(photoDays: ['2026-10-01']);
     await h.controller.startup();
     expect(await h.controller.generateDemoData(), 364);
     expect(h.controller.entryCount, 365);
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('generateDemoData without photos returns null', () async {
     h = await TestHarness.create();

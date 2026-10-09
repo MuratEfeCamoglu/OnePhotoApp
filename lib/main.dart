@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -20,6 +18,7 @@ import 'state/appearance_controller.dart';
 import 'state/timeline_controller.dart';
 import 'ui/settings/settings_screen.dart';
 import 'ui/timeline/timeline_screen.dart';
+import 'ui/widgets/splash_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +40,7 @@ Future<void> main() async {
     clock: systemClock,
   );
   final controller = TimelineController(service: service, clock: systemClock);
-  unawaited(controller.startup());
+  final startup = controller.startup();
 
   final navigatorKey = GlobalKey<NavigatorState>();
   final scheduler = LocalNotificationScheduler();
@@ -59,12 +58,15 @@ Future<void> main() async {
     OnePhotoApp(
       navigatorKey: navigatorKey,
       appearance: appearance,
-      home: TimelineScreen(
-        controller: controller,
-        settingsBuilder: (_) => SettingsScreen(
-          reminders: reminders,
-          appearance: appearance,
-          onGenerateDemoData: controller.generateDemoData,
+      home: SplashGate(
+        waitFor: startup,
+        child: TimelineScreen(
+          controller: controller,
+          settingsBuilder: (_) => SettingsScreen(
+            reminders: reminders,
+            appearance: appearance,
+            onGenerateDemoData: controller.generateDemoData,
+          ),
         ),
       ),
     ),
