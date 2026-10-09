@@ -1,4 +1,4 @@
-package com.muratefecamoglu.one_photo_app
+package com.onephotoapp.android
 
 import io.flutter.embedding.android.FlutterActivity
 
