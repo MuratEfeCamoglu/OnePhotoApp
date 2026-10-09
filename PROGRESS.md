@@ -11,7 +11,7 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 | 5. Ekleme akışları | ✅ | 8ee82f9 |
 | 6. Gün detayı | ✅ | e1825df |
 | 7. Hatırlatma | ✅ | cd94bcc |
-| 8. Cila ve teslim | ✅ | (bu commit) |
+| 8. Cila ve teslim | ✅ | 584ab9a |
 
 ## Aşama 1 — Kurulum
 Kriterler:
