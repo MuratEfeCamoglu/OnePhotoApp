@@ -88,4 +88,11 @@ void main() {
       );
     });
   });
+
+  test('formatting is stable when repeated (cached formatter)', () {
+    for (var i = 0; i < 3; i++) {
+      expect(formatShortDate('2026-10-05'), '5 Ekim 2026');
+    }
+    expect(formatMonthTitle(2026, 1), 'Ocak 2026');
+  });
 }

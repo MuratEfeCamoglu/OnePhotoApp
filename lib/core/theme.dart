@@ -40,7 +40,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     snackbar: Color(0xFF27272A),
     onSnackbar: Color(0xFFFAFAFA),
     handle: Color(0xFFC4C4CA),
-    navBar: Color(0xE6FFFFFF),
+    navBar: Color(0xF7FFFFFF),
   );
 
   /// Dark counterpart with the same hierarchy.
@@ -59,7 +59,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     snackbar: Color(0xFFE4E4E7),
     onSnackbar: Color(0xFF18181B),
     handle: Color(0xFF4A4A52),
-    navBar: Color(0xD9232327),
+    navBar: Color(0xF5232327),
   );
 
   final Color background;
@@ -77,7 +77,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color onSnackbar;
   final Color handle;
 
-  /// Translucent fill of the floating bottom bar.
+  /// Near-opaque fill of the floating bottom bar.
   final Color navBar;
 
   @override

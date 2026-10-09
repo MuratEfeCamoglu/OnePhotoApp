@@ -58,6 +58,7 @@ class EntranceAnimation extends StatefulWidget {
     required this.child,
     this.delay = Duration.zero,
     this.offset = 24,
+    this.enabled = true,
   });
 
   /// Content to reveal.
@@ -68,6 +69,9 @@ class EntranceAnimation extends StatefulWidget {
 
   /// Starting vertical offset in logical pixels.
   final double offset;
+
+  /// Shows [child] immediately when false (e.g. items scrolled in later).
+  final bool enabled;
 
   @override
   State<EntranceAnimation> createState() => _EntranceAnimationState();
@@ -82,13 +86,21 @@ class _EntranceAnimationState extends State<EntranceAnimation>
   void initState() {
     super.initState();
     final total = widget.delay + AppMotion.long;
-    _controller = AnimationController(vsync: this, duration: total);
+    _controller = AnimationController(
+      vsync: this,
+      duration: total,
+      value: widget.enabled ? 0 : 1,
+    );
     final start = widget.delay.inMicroseconds / total.inMicroseconds;
     _t = CurvedAnimation(
       parent: _controller,
       curve: Interval(start, 1, curve: AppMotion.curve),
     );
-    _controller.forward();
+    if (widget.enabled) {
+      _controller.forward().whenComplete(() {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   @override
@@ -99,6 +111,8 @@ class _EntranceAnimationState extends State<EntranceAnimation>
 
   @override
   Widget build(BuildContext context) {
+    // Finished animations add no layers, so scrolling stays cheap.
+    if (_controller.isCompleted) return widget.child;
     return AnimatedBuilder(
       animation: _t,
       builder: (context, child) => Opacity(

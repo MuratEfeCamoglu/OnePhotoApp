@@ -23,6 +23,7 @@ class DayCell extends StatelessWidget {
     this.heroTag,
     this.hasNote = false,
     this.category,
+    this.missing,
     this.onTap,
   });
 
@@ -50,15 +51,37 @@ class DayCell extends StatelessWidget {
   /// Category badge shown on the photo (ISKELET F12).
   final PhotoCategory? category;
 
+  /// Precomputed "file is gone" flag; checked on disk when `null`.
+  final bool? missing;
+
   /// Called on tap; ignored for future days.
   final VoidCallback? onTap;
 
   /// Whether the entry's file is gone from disk (ISKELET F6e).
-  bool get isMissing => photo != null && !photo!.existsSync();
+  bool get isMissing => photo != null && (missing ?? !photo!.existsSync());
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
+    if (isFuture) {
+      // Future days are only a dimmed number: no tap, ink or animations.
+      return Semantics(
+        label: label,
+        child: Opacity(
+          opacity: AppDimens.futureOpacity,
+          child: Center(
+            child: Text(
+              '$day',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: p.dayMuted,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final radius = BorderRadius.circular(AppDimens.cellRadius);
     final missing = isMissing;
     final Widget content;
@@ -93,7 +116,7 @@ class DayCell extends StatelessWidget {
       child: InkWell(
         borderRadius: radius,
         hoverColor: p.surface,
-        onTap: isFuture ? null : onTap,
+        onTap: onTap,
         child: ClipRRect(
           borderRadius: radius,
           // A new or replaced photo pops in instead of just appearing.
@@ -139,18 +162,12 @@ class DayCell extends StatelessWidget {
         ],
       );
     }
-    cell = Semantics(
+    return Semantics(
       label: label,
-      button: !isFuture,
+      button: true,
       selected: isToday,
-      child: PressScale(enabled: !isFuture, child: cell),
+      child: PressScale(child: cell),
     );
-    if (isFuture) {
-      cell = IgnorePointer(
-        child: Opacity(opacity: AppDimens.futureOpacity, child: cell),
-      );
-    }
-    return cell;
   }
 }
 
@@ -178,6 +195,9 @@ class _PhotoContent extends StatelessWidget {
     Widget image = Image.file(
       file,
       cacheWidth: 200,
+      // Already downscaled; smoother filtering is invisible at cell size
+      // but costs GPU time on every scroll frame.
+      filterQuality: FilterQuality.low,
       fit: BoxFit.cover,
       gaplessPlayback: true,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -227,7 +247,9 @@ class _PhotoContent extends StatelessWidget {
                 key: ValueKey('note-badge'),
                 size: 12,
                 color: Colors.white,
-                shadows: [Shadow(color: Color(0x99000000), blurRadius: 3)],
+                shadows: [
+                  Shadow(color: Color(0x99000000), offset: Offset(0, 1)),
+                ],
               ),
             ),
           Positioned(
@@ -242,11 +264,7 @@ class _PhotoContent extends StatelessWidget {
                 fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
                 color: Colors.white,
                 shadows: const [
-                  Shadow(
-                    color: Color(0x80000000),
-                    blurRadius: 2,
-                    offset: Offset(0, 1),
-                  ),
+                  Shadow(color: Color(0x80000000), offset: Offset(0, 1)),
                 ],
               ),
             ),

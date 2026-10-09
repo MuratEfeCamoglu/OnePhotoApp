@@ -70,7 +70,29 @@ void main() {
     expect(opacity(), 0);
     await tester.pump(const Duration(milliseconds: 50));
     expect(opacity(), 0, reason: 'still inside the delay');
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(opacity(), greaterThan(0));
     await tester.pumpAndSettle();
-    expect(opacity(), 1);
+    // Once finished the wrapper adds no layers at all.
+    expect(
+      find.ancestor(of: find.text('hi'), matching: find.byType(Opacity)),
+      findsNothing,
+    );
+  });
+
+  testWidgets('disabled EntranceAnimation shows the child at once', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: EntranceAnimation(enabled: false, child: Text('now')),
+      ),
+    );
+    expect(find.text('now'), findsOneWidget);
+    expect(
+      find.ancestor(of: find.text('now'), matching: find.byType(Opacity)),
+      findsNothing,
+    );
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }

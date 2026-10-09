@@ -21,6 +21,7 @@ class MonthGrid extends StatelessWidget {
     required this.onDayTap,
     this.hasNote,
     this.categoryFor,
+    this.missingFor,
   });
 
   /// Month to render.
@@ -38,12 +39,16 @@ class MonthGrid extends StatelessWidget {
   /// Category of a day (ISKELET F12); none when `null`.
   final PhotoCategory? Function(String dateKey)? categoryFor;
 
+  /// Whether a day's photo file is gone; checked by the cell when `null`.
+  final bool Function(String dateKey)? missingFor;
+
   /// Called with the day key of a tapped (non-future) cell.
   final ValueChanged<String> onDayTap;
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final cells = monthCells(month.year, month.month);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppDimens.gutter,
@@ -61,23 +66,26 @@ class MonthGrid extends StatelessWidget {
               style: AppText.month.copyWith(color: context.palette.onSurface),
             ),
           ),
-          GridView.count(
-            crossAxisCount: 7,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            // Today's ring sits just outside its cell.
-            clipBehavior: Clip.none,
-            mainAxisSpacing: AppDimens.cellGap,
-            crossAxisSpacing: AppDimens.cellGap,
-            children: [
-              for (final day in monthCells(month.year, month.month))
-                if (day == null)
-                  const SizedBox.shrink()
-                else
-                  _cell(day, strings),
-            ],
-          ),
+          // Plain rows instead of a shrink-wrapped GridView: a month is
+          // built in one go while scrolling, so it must be cheap.
+          for (var row = 0; row < cells.length ~/ 7; row++) ...[
+            if (row > 0) const SizedBox(height: AppDimens.cellGap),
+            Row(
+              children: [
+                for (var col = 0; col < 7; col++) ...[
+                  if (col > 0) const SizedBox(width: AppDimens.cellGap),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: cells[row * 7 + col] == null
+                          ? const SizedBox.shrink()
+                          : _cell(cells[row * 7 + col]!, strings),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -98,6 +106,7 @@ class MonthGrid extends StatelessWidget {
       heroTag: photo == null ? null : photoHeroTag(key),
       hasNote: hasNote?.call(key) ?? false,
       category: categoryFor?.call(key),
+      missing: photo == null ? null : missingFor?.call(key),
       onTap: () => onDayTap(key),
     );
   }

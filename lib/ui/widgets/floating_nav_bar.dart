@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
@@ -9,7 +7,7 @@ import 'motion.dart';
 /// Tabs of the home screen reachable from the bottom bar.
 enum HomeTab { timeline, gallery }
 
-/// Frosted pill at the bottom: home, today's camera, gallery
+/// Floating pill at the bottom: home, today's camera, gallery
 /// (ISKELET F1g, F13). Settings live in the top-right corner instead.
 class FloatingNavBar extends StatelessWidget {
   /// Creates the bar; a `null` callback disables its button.
@@ -50,45 +48,42 @@ class FloatingNavBar extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.16),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(36),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: p.navBar,
-                    borderRadius: BorderRadius.circular(36),
-                    border: Border.all(color: p.outline, width: 0.8),
+            // No BackdropFilter: re-blurring the scrolling grid every frame
+            // made mid-range GPUs drop frames; a near-opaque fill looks the
+            // same.
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: p.navBar,
+                borderRadius: BorderRadius.circular(36),
+                border: Border.all(color: p.outline, width: 0.8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _NavButton(
+                    key: const ValueKey('home-button'),
+                    icon: Icons.home_rounded,
+                    tooltip: s.homeTooltip,
+                    selected: selected == HomeTab.timeline,
+                    onTap: onHome,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _NavButton(
-                        key: const ValueKey('home-button'),
-                        icon: Icons.home_rounded,
-                        tooltip: s.homeTooltip,
-                        selected: selected == HomeTab.timeline,
-                        onTap: onHome,
-                      ),
-                      const SizedBox(width: 10),
-                      _CameraButton(tooltip: s.cameraTooltip, onTap: onCamera),
-                      const SizedBox(width: 10),
-                      _NavButton(
-                        key: const ValueKey('gallery-button'),
-                        icon: Icons.photo_library_rounded,
-                        tooltip: s.galleryTitle,
-                        selected: selected == HomeTab.gallery,
-                        onTap: onGallery,
-                      ),
-                    ],
+                  const SizedBox(width: 10),
+                  _CameraButton(tooltip: s.cameraTooltip, onTap: onCamera),
+                  const SizedBox(width: 10),
+                  _NavButton(
+                    key: const ValueKey('gallery-button'),
+                    icon: Icons.photo_library_rounded,
+                    tooltip: s.galleryTitle,
+                    selected: selected == HomeTab.gallery,
+                    onTap: onGallery,
                   ),
-                ),
+                ],
               ),
             ),
           ),

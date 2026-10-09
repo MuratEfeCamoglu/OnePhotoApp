@@ -125,4 +125,15 @@ void main() {
     );
     expect(notified, 1);
   });
+
+  test('fileExists checks the disk once per file and resets on load', () async {
+    h = await TestHarness.create(photoDays: ['2026-10-01']);
+    await h.controller.startup();
+    final entry = h.controller.entryFor('2026-10-01')!;
+    expect(h.controller.fileExists(entry), isTrue);
+    h.controller.fileFor(entry).deleteSync();
+    expect(h.controller.fileExists(entry), isTrue, reason: 'cached');
+    await h.controller.load();
+    expect(h.controller.fileExists(entry), isFalse);
+  });
 }

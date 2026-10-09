@@ -18,6 +18,7 @@ class TimelineController extends ChangeNotifier {
   final PhotoService _service;
   final Clock _clock;
   final Map<String, Entry> _entries = {};
+  final Map<String, bool> _exists = {};
   bool _loading = true;
   Exception? _pendingError;
 
@@ -42,6 +43,11 @@ class TimelineController extends ChangeNotifier {
 
   /// Photo file of [entry]; it may be missing on disk.
   File fileFor(Entry entry) => _service.fileFor(entry);
+
+  /// Whether [entry]'s file is on disk, checked once per file name so grid
+  /// builds do no synchronous disk access while scrolling.
+  bool fileExists(Entry entry) =>
+      _exists.putIfAbsent(entry.fileName, () => fileFor(entry).existsSync());
 
   /// Months to render, newest first (ISKELET F1b).
   List<YearMonth> get months {
@@ -78,6 +84,7 @@ class TimelineController extends ChangeNotifier {
   /// Reloads every entry from storage.
   Future<void> load() async {
     final all = await _service.loadAll();
+    _exists.clear();
     _entries
       ..clear()
       ..addEntries(all.map((e) => MapEntry(e.dateKey, e)));

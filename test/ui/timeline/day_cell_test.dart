@@ -176,4 +176,29 @@ void main() {
     expect(find.byKey(const ValueKey('category-badge')), findsOneWidget);
     expect(find.byIcon(Icons.flight_takeoff_rounded), findsOneWidget);
   });
+
+  testWidgets('precomputed missing flag avoids the disk check', (tester) async {
+    final file = writeSourcePhoto(dir);
+    await _pump(
+      tester,
+      DayCell(
+        day: 3,
+        label: '3',
+        isToday: false,
+        isFuture: false,
+        photo: file,
+        missing: true,
+      ),
+    );
+    expect(find.byIcon(Icons.broken_image), findsOneWidget);
+  });
+
+  testWidgets('future day is a plain dimmed number', (tester) async {
+    await _pump(
+      tester,
+      const DayCell(day: 20, label: '20', isToday: false, isFuture: true),
+    );
+    expect(find.byType(InkWell), findsNothing);
+    expect(find.text('20'), findsOneWidget);
+  });
 }

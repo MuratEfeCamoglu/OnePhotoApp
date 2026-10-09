@@ -51,7 +51,6 @@ class CategoryBadge extends StatelessWidget {
         color: category.color,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 1.2),
-        boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 3)],
       ),
       child: Icon(category.icon, size: size * 0.62, color: Colors.white),
     );

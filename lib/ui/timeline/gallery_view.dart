@@ -43,6 +43,9 @@ class GalleryView extends StatefulWidget {
 class _GalleryViewState extends State<GalleryView> {
   PhotoCategory? _filter;
 
+  // Tiles animate in on the first screenful only (see timeline).
+  bool _introDone = false;
+
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
@@ -130,15 +133,23 @@ class _GalleryViewState extends State<GalleryView> {
                     crossAxisSpacing: 4,
                   ),
                   itemCount: shown.length,
-                  itemBuilder: (context, i) => EntranceAnimation(
-                    key: ValueKey(shown[i].dateKey),
-                    delay: Duration(milliseconds: 30 * math.min(i, 9)),
-                    offset: 12,
-                    child: _GalleryTile(
-                      entry: shown[i],
-                      controller: widget.controller,
-                    ),
-                  ),
+                  itemBuilder: (context, i) {
+                    if (!_introDone) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => _introDone = true,
+                      );
+                    }
+                    return EntranceAnimation(
+                      key: ValueKey(shown[i].dateKey),
+                      enabled: !_introDone,
+                      delay: Duration(milliseconds: 30 * math.min(i, 9)),
+                      offset: 12,
+                      child: _GalleryTile(
+                        entry: shown[i],
+                        controller: widget.controller,
+                      ),
+                    );
+                  },
                 ),
               ),
             SliverToBoxAdapter(
@@ -247,12 +258,13 @@ class _GalleryTile extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (file.existsSync())
+              if (controller.fileExists(entry))
                 Hero(
                   tag: galleryHeroTag(entry.dateKey),
                   child: Image.file(
                     file,
                     cacheWidth: 360,
+                    filterQuality: FilterQuality.low,
                     fit: BoxFit.cover,
                     gaplessPlayback: true,
                     errorBuilder: (context, error, stack) => broken,
@@ -278,7 +290,9 @@ class _GalleryTile extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
-                    shadows: [Shadow(color: Color(0x80000000), blurRadius: 2)],
+                    shadows: [
+                      Shadow(color: Color(0x80000000), offset: Offset(0, 1)),
+                    ],
                   ),
                 ),
               ),
@@ -296,7 +310,9 @@ class _GalleryTile extends StatelessWidget {
                     Icons.sticky_note_2_rounded,
                     size: 14,
                     color: Colors.white,
-                    shadows: [Shadow(color: Color(0x99000000), blurRadius: 3)],
+                    shadows: [
+                      Shadow(color: Color(0x99000000), offset: Offset(0, 1)),
+                    ],
                   ),
                 ),
             ],

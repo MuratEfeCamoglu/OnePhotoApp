@@ -38,6 +38,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
   final _galleryScroll = ScrollController();
   HomeTab _tab = HomeTab.timeline;
 
+  // Months animate in only on the first screenful; months scrolled in later
+  // appear directly so fast scrolling never stacks opacity layers.
+  bool _introDone = false;
+
   TimelineController get _controller => widget.controller;
 
   @override
@@ -157,15 +161,23 @@ class _TimelineScreenState extends State<TimelineScreen> {
             SliverList.builder(
               itemCount: months.length + offset,
               itemBuilder: (context, index) {
+                if (!_introDone) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _introDone = true,
+                  );
+                }
+                final animate = !_introDone;
                 final delay = Duration(milliseconds: 70 * math.min(index, 4));
                 if (index < offset) {
                   return EntranceAnimation(
+                    enabled: animate,
                     child: _EmptyCard(onTap: _onCameraPressed),
                   );
                 }
                 final month = months[index - offset];
                 return EntranceAnimation(
                   key: ValueKey(month),
+                  enabled: animate,
                   delay: delay,
                   child: MonthGrid(
                     month: month,
@@ -177,6 +189,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
                     hasNote: (key) =>
                         _controller.entryFor(key)?.hasNote ?? false,
                     categoryFor: (key) => _controller.entryFor(key)?.category,
+                    missingFor: (key) {
+                      final entry = _controller.entryFor(key);
+                      return entry != null && !_controller.fileExists(entry);
+                    },
                     onDayTap: _onDayTap,
                   ),
                 );

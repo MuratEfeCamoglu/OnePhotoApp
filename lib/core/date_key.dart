@@ -30,8 +30,16 @@ DateTime parseDateKey(String key) {
   return date;
 }
 
-DateFormat _format(String pattern, Strings strings) =>
-    DateFormat(pattern, strings.language.localeName);
+final _formats = <String, DateFormat>{};
+
+// DateFormat parses its pattern on creation; grid cells format dozens of
+// dates per month, so reuse one instance per pattern and locale.
+DateFormat _format(String pattern, Strings strings) {
+  final locale = strings.language.localeName;
+  return _formats.putIfAbsent('$locale|$pattern', () {
+    return DateFormat(pattern, locale);
+  });
+}
 
 /// Month header such as "Ocak 2026" / "October 2026".
 String formatMonthTitle(int year, int month, {Strings strings = Strings.tr}) =>
