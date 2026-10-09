@@ -101,7 +101,7 @@ void main() {
     await pumpTimeline(
       tester,
       h,
-      settingsBuilder: (_) => const SettingsScreen(),
+      settingsBuilder: (_) => SettingsScreen(reminders: h.reminders),
     );
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();

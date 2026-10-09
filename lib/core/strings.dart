@@ -29,6 +29,15 @@ abstract final class Strings {
   static const storageInfo =
       'Fotoğraflar sadece bu cihazda saklanır; uygulamayı silersen kaybolur.';
   static const notificationPermissionDenied = 'Bildirim izni verilmedi';
+  static const reminderFailed = 'Hatırlatma ayarlanamadı, tekrar dene.';
+
+  /// "Saat: 20:00" for [minutes] after midnight.
+  static String reminderTime(int minutes) {
+    final h = (minutes ~/ 60).toString().padLeft(2, '0');
+    final m = (minutes % 60).toString().padLeft(2, '0');
+    return '$reminderTimePrefix$h:$m';
+  }
+
   static const reminderNotificationTitle = 'OnePhoto';
   static const reminderNotificationBody = 'Bugünün fotoğrafını ekledin mi?';
   static const reminderChannelName = 'Günlük hatırlatma';

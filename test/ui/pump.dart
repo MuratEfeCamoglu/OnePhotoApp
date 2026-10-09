@@ -25,7 +25,8 @@ Future<void> pumpTimeline(
     OnePhotoApp(
       home: TimelineScreen(
         controller: h.controller,
-        settingsBuilder: settingsBuilder ?? (_) => const SettingsScreen(),
+        settingsBuilder:
+            settingsBuilder ?? (_) => SettingsScreen(reminders: h.reminders),
       ),
     ),
   );

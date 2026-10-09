@@ -6,6 +6,7 @@ import 'package:one_photo_app/data/entry_repository.dart';
 import 'package:one_photo_app/data/photo_storage.dart';
 import 'package:one_photo_app/services/photo_picker.dart';
 import 'package:one_photo_app/services/photo_service.dart';
+import 'package:one_photo_app/services/reminder_service.dart';
 import 'package:one_photo_app/services/settings_store.dart';
 import 'package:one_photo_app/state/timeline_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -157,7 +158,41 @@ class TestHarness {
     clock: () => now,
   );
 
+  final FakeReminderScheduler scheduler = FakeReminderScheduler();
+
+  late final ReminderService reminders = ReminderService(
+    settings: settings,
+    scheduler: scheduler,
+  );
+
   void dispose() => root.deleteSync(recursive: true);
+}
+
+/// [ReminderScheduler] recording calls instead of touching the platform.
+class FakeReminderScheduler implements ReminderScheduler {
+  bool grant = true;
+  Exception? error;
+  int? scheduledMinutes;
+  int permissionRequests = 0;
+  int cancels = 0;
+
+  @override
+  Future<bool> requestPermission() async {
+    permissionRequests++;
+    return grant;
+  }
+
+  @override
+  Future<void> scheduleDaily(int minutes) async {
+    if (error != null) throw error!;
+    scheduledMinutes = minutes;
+  }
+
+  @override
+  Future<void> cancel() async {
+    cancels++;
+    scheduledMinutes = null;
+  }
 }
 
 /// Writes a small fake "photo" file into [dir].

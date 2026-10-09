@@ -9,8 +9,8 @@ Ortam: Windows 11, Flutter 3.47.5 (stable) / Dart 3.13.4, Android SDK 36. Bağl�
 | 3. Veri katmanı | ✅ | b5e8aaa |
 | 4. Zaman çizelgesi UI | ✅ | 6476121 |
 | 5. Ekleme akışları | ✅ | 8ee82f9 |
-| 6. Gün detayı | ✅ | (bu commit) |
-| 7. Hatırlatma | ⏳ | |
+| 6. Gün detayı | ✅ | e1825df |
+| 7. Hatırlatma | ✅ | (bu commit) |
 | 8. Cila ve teslim | ⏳ | |
 
 ## Aşama 1 — Kurulum
@@ -87,3 +87,15 @@ Kriterler → kanıt (`day_detail_screen_test`):
 - F5c "Sil" onay ister; onayda kayıt + dosya silinir, ana ekrana dönülür, hücre boş. "Vazgeç" hiçbir şeyi değiştirmez.
 - Ek: dosyası olmayan kayıtta detay kırık-resim ikonu gösterir (F6e).
 Doğrulama: format ✅, analyze ✅, 117/117 test ✅. Manuel (iki parmak yakınlaştırma): doğrulanmadı (cihaz yok).
+
+## Aşama 7 — Hatırlatma (F7)
+Kriterler → kanıt:
+- F7a anahtar + saat seçici, varsayılan kapalı / 20:00 → `settings_screen_test`, `settings_store_test`, `reminder_service_test`.
+- F7b açınca izin istenir; red → anahtar kapalıya döner + "Bildirim izni verilmedi" → `settings_screen_test`, `reminder_service_test`.
+- F7c her gün seçilen saatte "Bugünün fotoğrafını ekledin mi?" → `LocalNotificationScheduler.scheduleDaily` (`zonedSchedule`, `DateTimeComponents.time`, `inexactAllowWhileIdle`). Gerçek teslim: doğrulanmadı (cihaz yok).
+- F7d bildirime dokununca ana ekran → uygulama açılışı zaman çizelgesidir; açıkken dokunulursa `navigatorKey.popUntil(isFirst)`. Doğrulanmadı (cihaz yok).
+- F7e ayar yeniden başlatmada korunur → `settings_store_test`, `settings_screen_test` ("settings survive…"), açılışta `ReminderService.restore()`.
+- F7f yeniden başlatma sonrası → `RECEIVE_BOOT_COMPLETED` + `ScheduledNotificationBootReceiver` (Aşama 1). Doğrulanmadı (cihaz yok).
+- F7g saat seçici Türkçe ("Tamam/İptal"), 24 saat → `settings_screen_test`. Test, klavye modunda "07"nin 19 okunduğu bir Flutter tutarsızlığını yakaladı; seçici `alwaysUse24HourFormat: true` ile sarıldı.
+Hata durumu: zamanlama hatası "Hatırlatma ayarlanamadı, tekrar dene." SnackBar'ı.
+Doğrulama: format ✅, analyze ✅, 131/131 test ✅.
