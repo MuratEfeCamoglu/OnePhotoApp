@@ -63,6 +63,9 @@ abstract class Strings {
   String get delete;
 
   String get categoryLabel;
+  String get editDetails;
+  String get addDetails;
+  String get previewEmptyHint;
 
   /// Display name of [category].
   String categoryName(PhotoCategory category);
@@ -155,6 +158,12 @@ class _TrStrings extends Strings {
 
   @override
   String get categoryLabel => 'Kategori';
+  @override
+  String get editDetails => 'Düzenle';
+  @override
+  String get addDetails => 'Kategori ve not ekle';
+  @override
+  String get previewEmptyHint => 'Kategori ve not eklemek için tam ekranı aç.';
   @override
   String categoryName(PhotoCategory category) => switch (category) {
     PhotoCategory.food => 'Yemek',
@@ -286,6 +295,13 @@ class _EnStrings extends Strings {
 
   @override
   String get categoryLabel => 'Category';
+  @override
+  String get editDetails => 'Edit';
+  @override
+  String get addDetails => 'Add category and note';
+  @override
+  String get previewEmptyHint =>
+      'Open full screen to add a category and a note.';
   @override
   String categoryName(PhotoCategory category) => switch (category) {
     PhotoCategory.food => 'Food',

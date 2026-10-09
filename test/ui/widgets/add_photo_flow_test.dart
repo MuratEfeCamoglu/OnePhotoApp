@@ -1,5 +1,5 @@
 import 'package:one_photo_app/ui/widgets/category_style.dart';
-import 'package:one_photo_app/ui/day_detail/day_preview.dart';
+import 'package:one_photo_app/ui/day_detail/details_editor.dart';
 import 'package:one_photo_app/core/categories.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -165,7 +165,7 @@ void main() {
       tester,
       (c) => addPhotoFlow(c, h.controller, '2026-10-09', PhotoSource.camera),
     );
-    expect(find.byType(DayPreview), findsOneWidget);
+    expect(find.byType(DetailsEditor), findsOneWidget);
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('category-family')),
       120,
@@ -195,7 +195,7 @@ void main() {
         showDetails: false,
       ),
     );
-    expect(find.byType(DayPreview), findsNothing);
+    expect(find.byType(DetailsEditor), findsNothing);
     expect(h.repo.rows, hasLength(1));
   });
 }

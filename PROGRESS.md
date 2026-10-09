@@ -174,3 +174,9 @@ Doğrulama: format ✅, analyze ✅, 196/196 test ✅.
 - Gösterim: hücrede sol üstte renkli, simgeli rozet; tam ekran detayda kategori çipi.
 - Veri: `Entry.category`, şema v3 (`category TEXT`, eklemeli geçiş), `PhotoService.saveDetails`, `TimelineController.updateDetails`; fotoğraf değişince kategori korunur.
 Doğrulama: format ✅, analyze ✅, 221/221 test ✅.
+
+## Önizleme salt okunur, düzenleme tam ekranda (F11, F12 güncellemesi)
+- Önizleme kartı yalnızca gösterir: fotoğraf, tarih, kayıtlı kategori çipi ve not; değişiklik yok. "Tam ekran" (veya fotoğrafa dokunma) detayı açar.
+- Tam ekran detayda bilgi paneli (kategori + not, boşsa "Kategori ve not ekle"); panele veya kalem düğmesine dokunmak alttan düzenleyiciyi açar (`ui/day_detail/details_editor.dart`): kategori çipleri, not alanı, "Kaydet"; kapatınca da kaydeder.
+- Fotoğraf eklendikten sonra açılan pencere artık bu düzenleyici.
+Doğrulama: format ✅, analyze ✅, 224/224 test ✅.

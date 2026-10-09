@@ -5,7 +5,7 @@ import '../../core/theme.dart';
 import '../../data/entry.dart';
 import '../../services/photo_picker.dart';
 import '../../state/timeline_controller.dart';
-import '../day_detail/day_preview.dart';
+import '../day_detail/details_editor.dart';
 import 'error_snackbar.dart';
 import 'l10n.dart';
 import 'photo_source_sheet.dart';
@@ -43,8 +43,8 @@ Future<bool> confirmAction(
 /// Adds a photo from [source] to [dateKey].
 ///
 /// Asks before replacing an existing photo (ISKELET F4b) and turns
-/// expected errors into SnackBars (F8). With [showDetails] the preview card
-/// opens afterwards to pick a category and write a note (F11, F12).
+/// expected errors into SnackBars (F8). With [showDetails] the details
+/// editor opens afterwards to pick a category and write a note (F11, F12).
 /// Returns the saved entry or `null`.
 Future<Entry?> addPhotoFlow(
   BuildContext context,
@@ -69,7 +69,7 @@ Future<Entry?> addPhotoFlow(
     return null;
   }
   if (entry != null && showDetails && context.mounted) {
-    await showDayPreview(context, controller, dateKey);
+    await showDetailsEditor(context, controller, dateKey);
   }
   return entry;
 }

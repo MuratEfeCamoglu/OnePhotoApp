@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../core/date_key.dart';
 import '../../core/theme.dart';
+import '../../data/entry.dart';
 import '../../state/timeline_controller.dart';
 import '../timeline/day_cell.dart';
 import '../widgets/add_photo_flow.dart';
 import '../widgets/category_style.dart';
+import 'details_editor.dart';
 import '../widgets/error_snackbar.dart';
 import '../widgets/l10n.dart';
 import '../widgets/motion.dart';
@@ -75,41 +77,12 @@ class DayDetailScreen extends StatelessWidget {
               ),
             ),
           );
-          final category = entry.category;
-          if (!entry.hasNote && category == null) return viewer;
           return Column(
             children: [
               Expanded(child: viewer),
-              Container(
-                key: const ValueKey('detail-note'),
-                width: double.infinity,
-                margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: p.surface,
-                  borderRadius: BorderRadius.circular(AppDimens.cardRadius),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (category != null)
-                      CategoryChip(
-                        key: const ValueKey('detail-category'),
-                        category: category,
-                        selected: true,
-                      ),
-                    if (category != null && entry.hasNote)
-                      const SizedBox(height: 12),
-                    if (entry.hasNote)
-                      Text(
-                        entry.note!,
-                        style: AppText.body.copyWith(
-                          color: p.onSurface,
-                          height: 1.4,
-                        ),
-                      ),
-                  ],
-                ),
+              _DetailsPanel(
+                entry: entry,
+                onEdit: () => showDetailsEditor(context, controller, dateKey),
               ),
             ],
           );
@@ -188,6 +161,92 @@ class _ActionButton extends StatelessWidget {
         onPressed: onPressed,
         icon: Icon(icon, size: 20),
         label: Text(label),
+      ),
+    );
+  }
+}
+
+/// Category and note of the day with an edit button (ISKELET F11, F12).
+class _DetailsPanel extends StatelessWidget {
+  const _DetailsPanel({required this.entry, required this.onEdit});
+
+  final Entry entry;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final s = context.strings;
+    final category = entry.category;
+    final empty = category == null && !entry.hasNote;
+    return Container(
+      key: const ValueKey('detail-note'),
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      decoration: BoxDecoration(
+        color: p.surface,
+        borderRadius: BorderRadius.circular(AppDimens.cardRadius),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppDimens.cardRadius),
+          onTap: onEdit,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (empty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Text(
+                            s.addDetails,
+                            style: AppText.body.copyWith(color: p.dayMuted),
+                          ),
+                        ),
+                      if (category != null)
+                        CategoryChip(
+                          key: const ValueKey('detail-category'),
+                          category: category,
+                          selected: true,
+                        ),
+                      if (category != null && entry.hasNote)
+                        const SizedBox(height: 12),
+                      if (entry.hasNote)
+                        ConstrainedBox(
+                          // Long notes scroll instead of squeezing the photo.
+                          constraints: const BoxConstraints(maxHeight: 140),
+                          child: SingleChildScrollView(
+                            child: Text(
+                              entry.note!,
+                              style: AppText.body.copyWith(
+                                color: p.onSurface,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  key: const ValueKey('edit-details'),
+                  tooltip: s.editDetails,
+                  onPressed: onEdit,
+                  icon: Icon(
+                    empty ? Icons.add_circle_rounded : Icons.edit_rounded,
+                    color: p.accent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
