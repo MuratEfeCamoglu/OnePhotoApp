@@ -41,6 +41,10 @@ String formatMonthTitle(int year, int month, {Strings strings = Strings.tr}) =>
 String formatLongDate(String key, {Strings strings = Strings.tr}) =>
     _format(strings.longDatePattern, strings).format(parseDateKey(key));
 
+/// Compact label such as "9 Eki" / "Oct 9".
+String formatDayMonth(String key, {Strings strings = Strings.tr}) =>
+    _format(strings.dayMonthPattern, strings).format(parseDateKey(key));
+
 /// Sheet title such as "9 Ekim 2026".
 String formatShortDate(String key, {Strings strings = Strings.tr}) =>
     _format(strings.shortDatePattern, strings).format(parseDateKey(key));

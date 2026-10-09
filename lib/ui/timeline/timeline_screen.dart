@@ -11,6 +11,7 @@ import '../widgets/error_snackbar.dart';
 import '../widgets/floating_nav_bar.dart';
 import '../widgets/l10n.dart';
 import '../widgets/motion.dart';
+import 'gallery_view.dart';
 import 'month_grid.dart';
 
 /// Home screen: months newest first with day photos (ISKELET F1).
@@ -34,6 +35,8 @@ class TimelineScreen extends StatefulWidget {
 
 class _TimelineScreenState extends State<TimelineScreen> {
   final _scroll = ScrollController();
+  final _galleryScroll = ScrollController();
+  HomeTab _tab = HomeTab.timeline;
 
   TimelineController get _controller => widget.controller;
 
@@ -47,6 +50,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   void dispose() {
     _controller.removeListener(_showPendingError);
     _scroll.dispose();
+    _galleryScroll.dispose();
     super.dispose();
   }
 
@@ -60,9 +64,18 @@ class _TimelineScreenState extends State<TimelineScreen> {
         .push(MaterialPageRoute<void>(builder: widget.settingsBuilder));
   }
 
-  void _scrollToTop() {
-    if (!_scroll.hasClients) return;
-    _scroll.animateTo(0, duration: AppMotion.long, curve: AppMotion.curve);
+  void _scrollToTop(ScrollController scroll) {
+    if (!scroll.hasClients) return;
+    scroll.animateTo(0, duration: AppMotion.long, curve: AppMotion.curve);
+  }
+
+  /// Switches to [tab]; tapping the current tab scrolls it to the top.
+  void _selectTab(HomeTab tab) {
+    if (tab == _tab) {
+      _scrollToTop(tab == HomeTab.timeline ? _scroll : _galleryScroll);
+      return;
+    }
+    setState(() => _tab = tab);
   }
 
   // The camera button is always for today (ISKELET F3c).
@@ -88,85 +101,150 @@ class _TimelineScreenState extends State<TimelineScreen> {
     final p = context.palette;
     return Scaffold(
       extendBody: true,
-      body: ListenableBuilder(
-        listenable: _controller,
-        builder: (context, _) {
-          final slivers = <Widget>[
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _HeaderDelegate(
-                topPadding: MediaQuery.paddingOf(context).top,
-                title: context.strings.appTitle,
-                subtitle: context.strings.appSubtitle,
-                weekdays: context.strings.weekdaysShort,
-                palette: p,
-              ),
-            ),
-          ];
-          if (_controller.isLoading) {
-            slivers.add(
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            );
-          } else {
-            final months = _controller.months;
-            final today = _controller.todayKey;
-            final offset = _controller.isEmpty ? 1 : 0;
-            // Lazily built: only months near the viewport exist (ISKELET §5).
-            slivers.add(
-              SliverList.builder(
-                itemCount: months.length + offset,
-                itemBuilder: (context, index) {
-                  final delay = Duration(milliseconds: 70 * math.min(index, 4));
-                  if (index < offset) {
-                    return EntranceAnimation(
-                      child: _EmptyCard(onTap: _onCameraPressed),
-                    );
-                  }
-                  final month = months[index - offset];
-                  return EntranceAnimation(
-                    key: ValueKey(month),
-                    delay: delay,
-                    child: MonthGrid(
-                      month: month,
-                      todayKey: today,
-                      photoFor: (key) {
-                        final entry = _controller.entryFor(key);
-                        return entry == null
-                            ? null
-                            : _controller.fileFor(entry);
-                      },
-                      hasNote: (key) =>
-                          _controller.entryFor(key)?.hasNote ?? false,
-                      categoryFor: (key) => _controller.entryFor(key)?.category,
-                      onDayTap: _onDayTap,
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-          slivers.add(
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height:
-                    AppDimens.navBarClearance +
-                    MediaQuery.paddingOf(context).bottom,
-              ),
-            ),
-          );
-          return CustomScrollView(controller: _scroll, slivers: slivers);
-        },
+      // Both tabs stay alive so the timeline keeps its scroll position.
+      body: _TabSwitcher(
+        index: _tab.index,
+        children: [
+          _timeline(p),
+          GalleryView(controller: _controller, scroll: _galleryScroll),
+        ],
       ),
       bottomNavigationBar: ListenableBuilder(
         listenable: _controller,
         builder: (context, _) => FloatingNavBar(
-          onHome: _scrollToTop,
+          selected: _tab,
+          onHome: () => _selectTab(HomeTab.timeline),
+          onGallery: () => _selectTab(HomeTab.gallery),
           onCamera: _controller.isLoading ? null : _onCameraPressed,
           onSettings: _openSettings,
         ),
       ),
+    );
+  }
+
+  Widget _timeline(AppPalette p) {
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        final slivers = <Widget>[
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _HeaderDelegate(
+              topPadding: MediaQuery.paddingOf(context).top,
+              title: context.strings.appTitle,
+              subtitle: context.strings.appSubtitle,
+              weekdays: context.strings.weekdaysShort,
+              palette: p,
+            ),
+          ),
+        ];
+        if (_controller.isLoading) {
+          slivers.add(
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        } else {
+          final months = _controller.months;
+          final today = _controller.todayKey;
+          final offset = _controller.isEmpty ? 1 : 0;
+          // Lazily built: only months near the viewport exist (ISKELET §5).
+          slivers.add(
+            SliverList.builder(
+              itemCount: months.length + offset,
+              itemBuilder: (context, index) {
+                final delay = Duration(milliseconds: 70 * math.min(index, 4));
+                if (index < offset) {
+                  return EntranceAnimation(
+                    child: _EmptyCard(onTap: _onCameraPressed),
+                  );
+                }
+                final month = months[index - offset];
+                return EntranceAnimation(
+                  key: ValueKey(month),
+                  delay: delay,
+                  child: MonthGrid(
+                    month: month,
+                    todayKey: today,
+                    photoFor: (key) {
+                      final entry = _controller.entryFor(key);
+                      return entry == null ? null : _controller.fileFor(entry);
+                    },
+                    hasNote: (key) =>
+                        _controller.entryFor(key)?.hasNote ?? false,
+                    categoryFor: (key) => _controller.entryFor(key)?.category,
+                    onDayTap: _onDayTap,
+                  ),
+                );
+              },
+            ),
+          );
+        }
+        slivers.add(
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height:
+                  AppDimens.navBarClearance +
+                  MediaQuery.paddingOf(context).bottom,
+            ),
+          ),
+        );
+        return CustomScrollView(controller: _scroll, slivers: slivers);
+      },
+    );
+  }
+}
+
+/// Cross-fades between tabs while keeping every tab's state.
+///
+/// Only the current tab, and the previous one while it fades out, are
+/// onstage; the rest is offstage so it neither paints nor ticks.
+class _TabSwitcher extends StatefulWidget {
+  const _TabSwitcher({required this.index, required this.children});
+
+  final int index;
+  final List<Widget> children;
+
+  @override
+  State<_TabSwitcher> createState() => _TabSwitcherState();
+}
+
+class _TabSwitcherState extends State<_TabSwitcher> {
+  int? _leaving;
+
+  @override
+  void didUpdateWidget(_TabSwitcher old) {
+    super.didUpdateWidget(old);
+    if (old.index != widget.index) _leaving = old.index;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (final (i, child) in widget.children.indexed)
+          Offstage(
+            offstage: i != widget.index && i != _leaving,
+            child: TickerMode(
+              enabled: i == widget.index || i == _leaving,
+              child: IgnorePointer(
+                ignoring: i != widget.index,
+                child: AnimatedOpacity(
+                  opacity: i == widget.index ? 1 : 0,
+                  duration: AppMotion.medium,
+                  curve: AppMotion.curve,
+                  onEnd: () {
+                    if (i == _leaving && mounted) {
+                      setState(() => _leaving = null);
+                    }
+                  },
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

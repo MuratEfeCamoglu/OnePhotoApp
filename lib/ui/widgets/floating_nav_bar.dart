@@ -6,18 +6,30 @@ import '../../core/theme.dart';
 import 'l10n.dart';
 import 'motion.dart';
 
-/// Frosted pill at the bottom: home, today's camera, settings (ISKELET F1g).
+/// Tabs of the home screen reachable from the bottom bar.
+enum HomeTab { timeline, gallery }
+
+/// Frosted pill at the bottom: home, gallery, today's camera, settings
+/// (ISKELET F1g, F13).
 class FloatingNavBar extends StatelessWidget {
   /// Creates the bar; a `null` callback disables its button.
   const FloatingNavBar({
     super.key,
+    required this.selected,
     required this.onHome,
+    required this.onGallery,
     required this.onCamera,
     required this.onSettings,
   });
 
-  /// Scrolls the timeline back to the current month.
+  /// Highlighted tab.
+  final HomeTab selected;
+
+  /// Shows the timeline, or scrolls it back to the current month.
   final VoidCallback? onHome;
+
+  /// Shows the photo gallery.
+  final VoidCallback? onGallery;
 
   /// Takes today's photo.
   final VoidCallback? onCamera;
@@ -65,8 +77,16 @@ class FloatingNavBar extends StatelessWidget {
                         key: const ValueKey('home-button'),
                         icon: Icons.home_rounded,
                         tooltip: s.homeTooltip,
-                        selected: true,
+                        selected: selected == HomeTab.timeline,
                         onTap: onHome,
+                      ),
+                      const SizedBox(width: 6),
+                      _NavButton(
+                        key: const ValueKey('gallery-button'),
+                        icon: Icons.photo_library_rounded,
+                        tooltip: s.galleryTitle,
+                        selected: selected == HomeTab.gallery,
+                        onTap: onGallery,
                       ),
                       const SizedBox(width: 10),
                       _CameraButton(tooltip: s.cameraTooltip, onTap: onCamera),
@@ -108,19 +128,36 @@ class _NavButton extends StatelessWidget {
     final p = context.palette;
     return Tooltip(
       message: tooltip,
-      child: PressScale(
-        child: Material(
-          color: selected ? p.surface : Colors.transparent,
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: SizedBox.square(
-              dimension: 52,
-              child: Icon(
-                icon,
-                size: 26,
-                color: selected ? p.onSurface : p.dayMuted,
+      child: Semantics(
+        selected: selected,
+        button: true,
+        child: PressScale(
+          child: AnimatedContainer(
+            duration: AppMotion.medium,
+            curve: AppMotion.curve,
+            decoration: BoxDecoration(
+              color: selected ? p.surface : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                child: SizedBox.square(
+                  dimension: 52,
+                  child: AnimatedScale(
+                    scale: selected ? 1.08 : 1,
+                    duration: AppMotion.medium,
+                    curve: Curves.easeOutBack,
+                    child: Icon(
+                      icon,
+                      size: 26,
+                      color: selected ? p.onSurface : p.dayMuted,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

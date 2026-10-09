@@ -36,6 +36,10 @@ class TimelineController extends ChangeNotifier {
   /// Entry of [dateKey], if any.
   Entry? entryFor(String dateKey) => _entries[dateKey];
 
+  /// All entries, newest day first (gallery order).
+  List<Entry> get entriesNewestFirst =>
+      _entries.values.toList()..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+
   /// Photo file of [entry]; it may be missing on disk.
   File fileFor(Entry entry) => _service.fileFor(entry);
 

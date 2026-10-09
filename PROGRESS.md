@@ -180,3 +180,9 @@ Doğrulama: format ✅, analyze ✅, 221/221 test ✅.
 - Tam ekran detayda bilgi paneli (kategori + not, boşsa "Kategori ve not ekle"); panele veya kalem düğmesine dokunmak alttan düzenleyiciyi açar (`ui/day_detail/details_editor.dart`): kategori çipleri, not alanı, "Kaydet"; kapatınca da kaydeder.
 - Fotoğraf eklendikten sonra açılan pencere artık bu düzenleyici.
 Doğrulama: format ✅, analyze ✅, 224/224 test ✅.
+
+## Galeri (F13)
+- Alt çubuk: Ana sayfa · Galeri · Kamera · Ayarlar; seçili sekme animasyonlu vurgu. Ana sayfa/Galeri sekme gibi; açık sekmeye tekrar dokunmak başa kaydırır.
+- Galeri: büyük başlık + fotoğraf sayısı, 3 sütun kare ızgara (en yeni önce), karede kısa tarih + kategori rozeti + not işareti, karelerin sırayla belirmesi, kategori süzgeç çipleri, boş durum. Kareye dokununca salt okunur önizleme (Hero ile). `ui/timeline/gallery_view.dart`.
+- Sekmeler arası yumuşak geçiş; görünmeyen sekme geçiş bitince offstage (çizilmez), zaman çizelgesinin kaydırma konumu korunur.
+Doğrulama: format ✅, analyze ✅, 236/236 test ✅.

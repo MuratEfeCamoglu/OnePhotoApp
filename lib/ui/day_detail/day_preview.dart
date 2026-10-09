@@ -16,8 +16,9 @@ import 'day_detail_screen.dart';
 Future<void> showDayPreview(
   BuildContext context,
   TimelineController controller,
-  String dateKey,
-) {
+  String dateKey, {
+  String? heroTag,
+}) {
   return Navigator.of(context).push(
     PageRouteBuilder<void>(
       opaque: false,
@@ -26,8 +27,11 @@ Future<void> showDayPreview(
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       transitionDuration: AppMotion.medium,
       reverseTransitionDuration: AppMotion.short,
-      pageBuilder: (_, _, _) =>
-          DayPreview(controller: controller, dateKey: dateKey),
+      pageBuilder: (_, _, _) => DayPreview(
+        controller: controller,
+        dateKey: dateKey,
+        heroTag: heroTag,
+      ),
       transitionsBuilder: (_, animation, _, child) {
         final curved = CurvedAnimation(
           parent: animation,
@@ -54,7 +58,11 @@ class DayPreview extends StatelessWidget {
     super.key,
     required this.controller,
     required this.dateKey,
+    this.heroTag,
   });
+
+  /// Hero tag of the tapped thumbnail; the grid cell's tag by default.
+  final String? heroTag;
 
   /// Source of the entry.
   final TimelineController controller;
@@ -190,7 +198,7 @@ class DayPreview extends StatelessWidget {
         onTap: () => _openFull(context),
         child: file.existsSync()
             ? Hero(
-                tag: photoHeroTag(dateKey),
+                tag: heroTag ?? photoHeroTag(dateKey),
                 child: Image.file(
                   file,
                   key: ValueKey(entry.fileName),

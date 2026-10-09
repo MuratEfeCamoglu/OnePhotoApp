@@ -47,6 +47,7 @@ abstract class Strings {
   String get monthPattern;
   String get longDatePattern;
   String get shortDatePattern;
+  String get dayMonthPattern;
 
   String get appTitle => 'OnePhoto';
   String get appSubtitle;
@@ -74,6 +75,14 @@ abstract class Strings {
   String get noteHint;
   String get save;
   String get fullScreen;
+
+  String get galleryTitle;
+  String get galleryEmpty;
+  String get galleryEmptyHint;
+  String get allCategories;
+
+  /// "12 fotoğraf" / "1 photo".
+  String photoCount(int count);
 
   String get homeTooltip;
   String get cameraTooltip;
@@ -124,6 +133,8 @@ class _TrStrings extends Strings {
   String get longDatePattern => 'd MMMM y, EEEE';
   @override
   String get shortDatePattern => 'd MMMM y';
+  @override
+  String get dayMonthPattern => 'd MMM';
 
   @override
   String get appSubtitle => 'Hayatın, günde tek kare.';
@@ -191,6 +202,17 @@ class _TrStrings extends Strings {
   String get save => 'Kaydet';
   @override
   String get fullScreen => 'Tam ekran';
+
+  @override
+  String get galleryTitle => 'Galeri';
+  @override
+  String get galleryEmpty => 'Henüz fotoğraf yok';
+  @override
+  String get galleryEmptyHint => 'Kamera düğmesiyle ilk kareni ekle.';
+  @override
+  String get allCategories => 'Tümü';
+  @override
+  String photoCount(int count) => '$count fotoğraf';
 
   @override
   String get homeTooltip => 'Ana sayfa';
@@ -261,6 +283,8 @@ class _EnStrings extends Strings {
   String get longDatePattern => 'EEEE, MMMM d, y';
   @override
   String get shortDatePattern => 'MMMM d, y';
+  @override
+  String get dayMonthPattern => 'MMM d';
 
   @override
   String get appSubtitle => 'Your life, one photo at a time.';
@@ -329,6 +353,17 @@ class _EnStrings extends Strings {
   String get save => 'Save';
   @override
   String get fullScreen => 'Full screen';
+
+  @override
+  String get galleryTitle => 'Gallery';
+  @override
+  String get galleryEmpty => 'No photos yet';
+  @override
+  String get galleryEmptyHint => 'Add your first shot with the camera button.';
+  @override
+  String get allCategories => 'All';
+  @override
+  String photoCount(int count) => count == 1 ? '1 photo' : '$count photos';
 
   @override
   String get homeTooltip => 'Home';
