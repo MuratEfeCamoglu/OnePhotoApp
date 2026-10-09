@@ -7,35 +7,15 @@ Kullanıcının her gün tek bir fotoğraf eklediği ve bunları ay ay takvim ı
 - Çelişkide sıralama: ISKELET.md > CLAUDE.md > AGENT.md.
 
 ## Teknoloji Yığını
-- Dil / SDK: Dart ≥ 3.9, Flutter stable ≥ 3.35
-- Platform: Android (minSdk 24), iOS (≥ 13.0); sadece telefon, dikey
-- Yerel veritabanı: `sqflite` (tablo `entries`, bkz. ISKELET §3)
-- Dosyalar: `path_provider` + `path` → `<belgeler>/photos/`
-- Fotoğraf alma: `image_picker` (sistem kamerası + galeri)
-- Ayarlar: `shared_preferences`
-- Bildirim: `flutter_local_notifications` + `timezone` + `flutter_timezone`
-- Tarih biçimleme: `intl` (`tr_TR`)
-- Durum yönetimi: `ChangeNotifier` + `ListenableBuilder` (ek paket yok)
-- Test: `flutter_test`, `sqflite_common_ffi` (DB testleri)
-- Lint: `flutter_lints`
-- Onaylı paket listesi dışına çıkma (bkz. AGENT.md "Onay Gerektirenler").
+- Durum yönetimi: `ChangeNotifier` + `ListenableBuilder` (ek paket yok).
+- Onaylı paket listesi (ISKELET §3) dışına çıkma (bkz. AGENT.md "Onay Gerektirenler").
 
 ## Komutlar
-Aşama 1 tamamlanana kadar `pubspec.yaml` yoktur; ilk iş `flutter create` (ISKELET §6 Aşama 1).
-
 | İş | Komut |
 |---|---|
-| Kurulum | `flutter pub get` |
-| Çalıştır (debug) | `flutter run` |
 | Performans ölçümü | `flutter run --profile` |
-| Test (tümü) | `flutter test` |
-| Tek test dosyası | `flutter test test/core/calendar_test.dart` |
-| Statik analiz | `flutter analyze` |
-| Biçim kontrolü | `dart format --output=none --set-exit-if-changed .` |
-| Biçimlendir | `dart format .` |
-| Android build (doğrulama) | `flutter build apk --debug` |
-| Android release | `flutter build apk --release` |
 | iOS build (sadece macOS) | `flutter build ios --no-codesign` |
+| Standart | `flutter pub get`, `flutter run`, `flutter test [dosya]`, `flutter analyze`, `dart format .`, `flutter build apk --debug\|--release` |
 
 **Doğrulama üçlüsü** (her değişiklikten sonra, hepsi 0 hata/uyarı ile geçmeli):
 ```
